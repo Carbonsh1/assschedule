@@ -148,7 +148,6 @@
       border: 1px solid var(--border);
     }
 
-    /* 通用按鈕與膠囊 */
     button, .member-chip, .custom-select-trigger, .custom-option {
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -157,7 +156,6 @@
       transform: scale(0.95) !important;
     }
 
-    /* 頂部設定列 */
     .top-settings-bar {
       display: flex;
       justify-content: space-between;
@@ -208,7 +206,6 @@
       box-shadow: 0 0 14px var(--primary-glow);
     }
 
-    /* 頂部 Hero Diegetic HUD 風格面板 */
     .hero-header {
       background: #14171d;
       border: 2px solid var(--primary);
@@ -317,7 +314,6 @@
       color: #ffffff;
     }
 
-    /* 絕區零卡片通用設計 */
     .section-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
@@ -366,7 +362,6 @@
       font-size: 1.1rem;
     }
 
-    /* 成員選擇膠囊 */
     .member-chips-bar {
       display: flex;
       align-items: center;
@@ -393,7 +388,7 @@
     .member-chip .avatar-circle {
       padding: 2px 6px;
       background: var(--chip-color, var(--primary));
-      color: #000000;
+      color: #0d0f12;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -446,7 +441,6 @@
       color: var(--primary);
     }
 
-    /* 控制列 */
     .controls-row {
       display: flex;
       align-items: center;
@@ -524,7 +518,6 @@
       color: #ffffff;
     }
 
-    /* 戰術網格課表 (徹底解決 3D 傾斜邊緣陷落、時間軸拉寬 115px、單行不折疊) */
     .timetable-wrapper {
       width: 100%;
       overflow-x: hidden;
@@ -551,7 +544,6 @@
       opacity: 0.2;
     }
 
-    /* SVG 戰術連線層 */
     .tactical-svg-overlay {
       position: absolute;
       inset: 0;
@@ -695,13 +687,11 @@
                   z-index 0.1s ease;
     }
 
-    /* 懸停預備效果 */
     .grid-event-card:hover {
       z-index: 9999999 !important;
       transform: translateZ(50px) scale(1.03);
     }
 
-    /* 點擊多選聚焦時的 3D Z 軸前浮彈出與平滑過渡 */
     .grid-event-card.focused-card {
       z-index: 99999999 !important;
       transform: translateZ(var(--card-z-offset, 110px)) scale(1.04) !important;
@@ -716,7 +706,7 @@
       height: 100%;
       padding: 6px 8px;
       border-left: 4px solid var(--event-color, var(--primary));
-      background: var(--event-bg, #252a36);
+      background: var(--event-bg, #1e2430);
       color: #ffffff;
       display: flex;
       flex-direction: column;
@@ -741,8 +731,8 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      background: rgba(0, 0, 0, 0.85);
-      color: var(--primary);
+      background: rgba(13, 15, 18, 0.9);
+      color: var(--event-color, var(--primary));
       padding: 2px 6px;
       font-size: 0.72rem;
       font-weight: 900;
@@ -750,7 +740,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      border-left: 2px solid var(--primary);
+      border-left: 2px solid var(--event-color, var(--primary));
     }
 
     .event-card-title {
@@ -765,7 +755,6 @@
       color: #ffffff;
     }
 
-    /* 3D 純文字戰術懸浮倒數指示標籤 (智慧避讓定位：靠近頂部/向上彈窗時置於底部，其餘置於頂部) */
     .diegetic-single-text-hud {
       position: absolute;
       left: 0;
@@ -790,7 +779,6 @@
       animation: fadeIn 0.3s ease;
     }
 
-    /* 精緻懸停 Popover 彈框 */
     .hover-popover {
       position: absolute;
       top: -6px;
@@ -821,7 +809,6 @@
       bottom: -6px;
     }
 
-    /* 懸停/聚焦時順暢展開 */
     .grid-event-card:hover .hover-popover,
     .grid-event-card.focused-card .hover-popover {
       opacity: 1;
@@ -839,7 +826,7 @@
       display: inline-block;
       padding: 3px 8px;
       background: var(--event-color, var(--primary));
-      color: #000000;
+      color: #0d0f12;
       font-weight: 900;
       font-size: 0.78rem;
       margin-bottom: 8px;
@@ -864,7 +851,6 @@
       font-weight: 700;
     }
 
-    /* 每日清單檢視 */
     .list-view-container {
       display: flex;
       flex-direction: column;
@@ -948,7 +934,6 @@
       font-weight: 600;
     }
 
-    /* 網格空閒圖層 Overlay */
     .free-overlay-block {
       position: absolute;
       left: 3px;
@@ -967,7 +952,6 @@
       transform: translateZ(12px);
     }
 
-    /* 自訂 Popover 下拉選單組件 */
     .custom-select-group {
       display: flex;
       flex-direction: column;
@@ -1061,7 +1045,6 @@
       font-weight: 900;
     }
 
-    /* 共同空閒時間比對分析 */
     .analysis-controls-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1142,7 +1125,6 @@
       font-weight: 600;
     }
 
-    /* PNG 導出 Modal 彈框樣式 */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1228,7 +1210,6 @@
       margin-top: 20px;
     }
 
-    /* 手機移動端優化 Mobile Responsive Enhancements */
     @media (max-width: 768px) {
       body {
         padding: 0 10px 40px 10px;
@@ -1261,10 +1242,10 @@
       }
       .timetable-header-grid,
       .timetable-body-grid {
-        min-width: 750px; /* 手機端保留充足寬度與順暢橫向滾動 */
+        min-width: 750px;
       }
       #hud-bottom-right {
-        display: none; /* 手機下隱藏右下角數據，節省螢幕空間 */
+        display: none;
       }
     }
   </style>
@@ -1375,7 +1356,6 @@
 
 <!-- 網格視圖容器 -->
 <div class="timetable-wrapper" id="grid-view-wrapper">
-  <!-- SVG 戰術連線 -->
   <svg class="tactical-svg-overlay" id="tactical-svg-overlay"></svg>
 
   <div class="timetable-header-grid" id="timetable-header-grid">
@@ -1499,7 +1479,7 @@
     let selectedMemberIds = [];
     let isOverlayActive = false;
     let selectedExportOption = 'sched-only';
-    let selectedCardsList = []; // 多選 3D 課程陣列 [{ el, evt }]
+    let selectedCardsList = [];
 
     const INSTITUTIONS = {
       sep7: { nameZh: '7/9 開學 (HKCC / UOW)', nameEn: '7/9 Start (HKCC / UOW)', date: new Date(2026, 8, 7) },
@@ -1514,12 +1494,14 @@
     let filterEndHour = 22;
     let filterMinDuration = 60;
 
+    // 現代淺色調 Modern Bright & Tech Color Palette
+    // Gennadius: 清爽亮藍 (#38bdf8), Jason: 時尚淡粉 (#f472b6)
     const PRESET_MEMBERS = [
       {
         id: 'hino',
         name: 'Hino',
-        color: '#e6ff00',
-        bg: '#2d3300',
+        color: '#facc15', // 現代亮檸檬黃
+        bg: '#2e2810',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1588,8 +1570,8 @@ END:VCALENDAR`
       {
         id: 'gennadius',
         name: 'Gennadius',
-        color: '#38bdf8',
-        bg: '#0c4a6e',
+        color: '#38bdf8', // 清爽亮藍 (Blue)
+        bg: '#11293a',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1658,8 +1640,8 @@ END:VCALENDAR`
       {
         id: 'juno',
         name: 'Juno',
-        color: '#c084fc',
-        bg: '#581c87',
+        color: '#c084fc', // 柔和淺紫羅蘭
+        bg: '#2a1a38',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1704,8 +1686,8 @@ END:VCALENDAR`
       {
         id: 'jason',
         name: 'Jason',
-        color: '#fb923c',
-        bg: '#7c2d12',
+        color: '#f472b6', // 亮粉色 (Pink)
+        bg: '#331926',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1792,8 +1774,8 @@ END:VCALENDAR`
       {
         id: 'kelvin',
         name: 'Kelvin',
-        color: '#f43f5e',
-        bg: '#881337',
+        color: '#fb7185', // 柔亮珊瑚紅
+        bg: '#33151b',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1862,8 +1844,8 @@ END:VCALENDAR`
       {
         id: 'tenson',
         name: 'Tenson',
-        color: '#2dd4bf',
-        bg: '#134e4a',
+        color: '#2dd4bf', // 亮薄荷綠
+        bg: '#0f2f2b',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1922,8 +1904,8 @@ END:VCALENDAR`
       {
         id: 'enoch',
         name: 'Enoch',
-        color: '#f87171',
-        bg: '#7f1d1d',
+        color: '#fb923c', // 現代明亮蜜桃橙
+        bg: '#331d0f',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1952,76 +1934,124 @@ END:VCALENDAR`
       {
         id: 'kim',
         name: 'Kim',
-        color: '#f472b6',
-        bg: '#831843',
+        color: '#e879f9', // 明亮粉紫蘭花色
+        bg: '#321636',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
-SUMMARY:Chinese and Western Modes of Thought (HUMN2007)
-LOCATION:DLB411
-DTSTART;TZID=Asia/Hong_Kong:20260907T093000
-DTEND;TZID=Asia/Hong_Kong:20260907T122000
+SUMMARY:Invitation to Social Sciences (SOSC1006 00009)
+LOCATION:WLB206
+DTSTART:20260907T103000
+DTEND:20260907T122000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Win the Games! (GFQR1065)
+SUMMARY:Win the Games! (GFQR1065 00001)
 LOCATION:AST916
-DTSTART;TZID=Asia/Hong_Kong:20260907T143000
-DTEND;TZID=Asia/Hong_Kong:20260907T162000
+DTSTART:20260907T143000
+DTEND:20260907T162000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:The Individual and Society (GFCC1037)
+SUMMARY:Geography and the Contemporary World (GEOG1005 00001)
+LOCATION:WYS705
+DTSTART:20260907T163000
+DTEND:20260907T182000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:The Individual and Society (GFCC1037 00001)
 LOCATION:SCT501
-DTSTART;TZID=Asia/Hong_Kong:20260908T093000
-DTEND;TZID=Asia/Hong_Kong:20260908T122000
+DTSTART:20260908T093000
+DTEND:20260908T122000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:University Chinese (UCLC1005)
+SUMMARY:University Chinese (UCLC1005 00016)
 LOCATION:OEM602
-DTSTART;TZID=Asia/Hong_Kong:20260908T133000
-DTEND;TZID=Asia/Hong_Kong:20260908T142000
+DTSTART:20260908T133000
+DTEND:20260908T142000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:University Life (ULIF1005)
-LOCATION:Not specified
-DTSTART;TZID=Asia/Hong_Kong:20260908T143000
-DTEND;TZID=Asia/Hong_Kong:20260908T162000
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:University Chinese (UCLC1005)
+SUMMARY:University Life (ULIF1005 00001)
 LOCATION:OEM905
-DTSTART;TZID=Asia/Hong_Kong:20260909T163000
-DTEND;TZID=Asia/Hong_Kong:20260909T182000
+DTSTART:20260908T143000
+DTEND:20260908T162000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Win the Games! (GFQR1065)
+SUMMARY:Geography and the Contemporary World (GEOG1005 00001)
+LOCATION:WLB204
+DTSTART:20260909T113000
+DTEND:20260909T122000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:University Chinese (UCLC1005 00016)
+LOCATION:OEM905
+DTSTART:20260909T163000
+DTEND:20260909T182000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Win the Games! (GFQR1065 00001)
 LOCATION:DLB411
-DTSTART;TZID=Asia/Hong_Kong:20260910T093000
-DTEND;TZID=Asia/Hong_Kong:20260910T102000
+DTSTART:20260910T093000
+DTEND:20260910T102000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Invitation to Social Sciences (SOSC1006)
-LOCATION:CVA203
-DTSTART;TZID=Asia/Hong_Kong:20260910T133000
-DTEND;TZID=Asia/Hong_Kong:20260910T152000
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:History, Heritage and Human Communities (HIST1405)
+SUMMARY:History, Heritage and Human Communities (HIST1405 00002)
 LOCATION:SCM012
-DTSTART;TZID=Asia/Hong_Kong:20260911T083000
-DTEND;TZID=Asia/Hong_Kong:20260911T112000
+DTSTART:20260911T083000
+DTEND:20260911T112000
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Enhancing English through Global Citizenship (LANG0036)
+SUMMARY:Enhancing English through Global Citizenship (LANG0036 00026)
 LOCATION:WYS614
-DTSTART;TZID=Asia/Hong_Kong:20260911T133000
-DTEND;TZID=Asia/Hong_Kong:20260911T152000
+DTSTART:20260911T133000
+DTEND:20260911T152000
 END:VEVENT
 END:VCALENDAR`
+      },
+      {
+        id: 'hugo',
+        name: 'Hugo',
+        color: '#34d399', // 翡翠淺碧綠 (Emerald Neon)
+        bg: '#0f3325',
+        text: '#ffffff',
+        // 包含複雜週次的多週次事件
+        eventsData: [
+          { day: 1, start: 570, end: 690, title: "ST-IT-MET3906-S1-L/1", loc: "ST-CS-404", weeks: "1-17" },
+          { day: 1, start: 630, end: 750, title: "ST-IT-MET3902-S1-L/3", loc: "ST-CS-404", weeks: "1-17" },
+          { day: 1, start: 690, end: 750, title: "ST-IT-MET4336-S1-L/1", loc: "ST-CS-404", weeks: "1-17" },
+          { day: 1, start: 840, end: 900, title: "ST-IT-LAN3107-S1-T2/07", loc: "ST-LC-N404", weeks: "1, 3, 5, 7, 9, 11, 13, 15, 17" },
+          { day: 1, start: 960, end: 1020, title: "ST-IT-ITE3101-S1-W/08", loc: "ST-IT-421B", weeks: "1-17" },
+          { day: 2, start: 660, end: 750, title: "ST-IT-MET3919-S1-W/5", loc: "ST-IT-429", weeks: "1-16" },
+          { day: 2, start: 840, end: 900, title: "ST-IT-LAN3107-S1-T1/07", loc: "ST-CS-203", weeks: "2, 4, 6, 8, 10, 12, 14, 16" },
+          { day: 2, start: 840, end: 930, title: "ST-IT-SDD4006-S1-T/1", loc: "ST-CS-N108A", weeks: "1-15" },
+          { day: 3, start: 570, end: 660, title: "ST-IT-MET4336-S1-W/1", loc: "ST-IT-429", weeks: "1-17" },
+          { day: 3, start: 690, end: 750, title: "ST-IT-ITE3107-S1-L/1", loc: "ST-CS-404", weeks: "1-17" },
+          { day: 3, start: 750, end: 810, title: "ST-IT-ITE3101-S1-L/3", loc: "ST-CS-404", weeks: "1-17" },
+          { day: 4, start: 540, end: 600, title: "ST-IT-MET3906-S1-W/1", loc: "ST-IT-421B", weeks: "1-17" },
+          { day: 4, start: 630, end: 690, title: "ST-IT-ITE3107-S1-T/01", loc: "ST-CS-438", weeks: "1-17" },
+          { day: 5, start: 840, end: 930, title: "ST-IT-MET3902-S1-W/5", loc: "ST-IT-429", weeks: "1-17" },
+          { day: 5, start: 960, end: 1020, title: "ST-IT-MET3918-S1-W/5", loc: "ST-IT-015", weeks: "1-16" }
+        ]
       }
     ];
 
     let parsedMemberEvents = {};
+
+    function parseWeeksString(weekStr) {
+      const weeks = new Set();
+      if (!weekStr) return weeks;
+      const parts = weekStr.split(',');
+      for (let part of parts) {
+        part = part.trim();
+        if (part.includes('-')) {
+          const [start, end] = part.split('-').map(Number);
+          for (let i = start; i <= end; i++) weeks.add(i);
+        } else {
+          const val = Number(part);
+          if (!isNaN(val)) weeks.add(val);
+        }
+      }
+      return weeks;
+    }
 
     function getMemberInitials(name) {
       if (!name) return '?';
@@ -2222,7 +2252,6 @@ END:VCALENDAR`
       if (svgOverlay) svgOverlay.innerHTML = '';
     }
 
-    // 計算坐標中心並執行顯著 3D 戰術傾斜
     function update3DTiltAndDiegeticLines() {
       const wrapper = document.getElementById('grid-view-wrapper');
       const bodyGrid = document.getElementById('timetable-body-grid');
@@ -2237,7 +2266,6 @@ END:VCALENDAR`
         return;
       }
 
-      // 1. 幾何計算加權中心
       let totalDay = 0;
       let totalMin = 0;
       selectedCardsList.forEach(item => {
@@ -2248,7 +2276,6 @@ END:VCALENDAR`
       const avgDay = totalDay / selectedCardsList.length;
       const avgMin = totalMin / selectedCardsList.length;
 
-      // 限制傾斜角度，確保網格平穩
       const rawRotY = -((avgDay - 3.5) * 2.0);
       const rawRotX = ((avgMin - 900) / 420) * 3.0;
       const rotY = Math.max(-4, Math.min(4, rawRotY));
@@ -2257,7 +2284,6 @@ END:VCALENDAR`
       bodyGrid.style.transform = 'translateZ(100px) rotateX(' + rotX.toFixed(2) + 'deg) rotateY(' + rotY.toFixed(2) + 'deg) scale(0.97)';
       wrapper.style.boxShadow = '0 25px 60px rgba(0,0,0,0.98), 0 0 35px var(--primary-glow)';
 
-      // 2. 於選中課程卡片頂部/底部渲染 3D 純文字戰術倒數 (智慧避讓定位：靠近頂部/向上彈窗時置於底部，其餘置於頂部)
       const dict = I18N_DICT[currentLang];
       svgOverlay.innerHTML = '';
 
@@ -2298,7 +2324,6 @@ END:VCALENDAR`
         const hudText = document.createElement('div');
         hudText.className = 'diegetic-single-text-hud';
 
-        // 智慧避讓定位邏輯：靠頂部 (cardTop < 90px) 或向上彈窗時，將倒數標籤顯示於卡片正下方 (-28px)，確保 100% 視覺不被頂部 Header 遮擋！
         if (isPopUp || cardTop < 90) {
           hudText.style.top = 'auto';
           hudText.style.bottom = '-28px';
@@ -2314,7 +2339,25 @@ END:VCALENDAR`
 
     function parseAllPresets() {
       PRESET_MEMBERS.forEach(m => {
-        parsedMemberEvents[m.id] = parseICS(m.ics, m);
+        if (m.eventsData) {
+          parsedMemberEvents[m.id] = m.eventsData.map(ed => ({
+            memberId: m.id,
+            memberName: m.name,
+            memberInitials: getMemberInitials(m.name),
+            color: m.color,
+            bg: m.bg,
+            text: m.text,
+            summary: ed.title,
+            location: ed.loc || 'N/A',
+            description: 'Weeks: ' + ed.weeks,
+            dayOfWeek: ed.day,
+            startMin: ed.start,
+            endMin: ed.end,
+            activeWeeks: parseWeeksString(ed.weeks)
+          }));
+        } else if (m.ics) {
+          parsedMemberEvents[m.id] = parseICS(m.ics, m);
+        }
       });
     }
 
@@ -2553,6 +2596,7 @@ END:VCALENDAR`
       currentWeekOffset += delta;
       clearAllSelectedCards();
       renderTimetableDisplay();
+      runFreeTimeAnalysis();
     }
 
     function resetToToday() {
@@ -2570,6 +2614,16 @@ END:VCALENDAR`
       updateHeaderDateDisplay();
       renderTimetableDisplay();
       runFreeTimeAnalysis();
+    }
+
+    function getEventsForWeek(mId, currentWeekNum) {
+      const events = parsedMemberEvents[mId] || [];
+      return events.filter(e => {
+        if (e.activeWeeks) {
+          return e.activeWeeks.has(currentWeekNum);
+        }
+        return true;
+      });
     }
 
     function renderTimetableDisplay() {
@@ -2654,6 +2708,7 @@ END:VCALENDAR`
 
     function renderEventCardsOnGrid() {
       if (selectedMemberIds.length === 0) return;
+      const currentWeekNum = 1 + currentWeekOffset;
 
       for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
         const dayCol = document.getElementById('day-col-' + dayIdx);
@@ -2661,7 +2716,7 @@ END:VCALENDAR`
 
         let dayEvents = [];
         selectedMemberIds.forEach(mId => {
-          const events = parsedMemberEvents[mId] || [];
+          const events = getEventsForWeek(mId, currentWeekNum);
           events.filter(e => e.dayOfWeek === dayIdx).forEach(e => dayEvents.push(e));
         });
 
@@ -2685,7 +2740,6 @@ END:VCALENDAR`
             leftPct = memberOrder * widthPct;
           }
 
-          // 頂部計算加入 10px 的頭部安全導航間距，避免 8:00 AM 卡片與 Header 貼死
           const topPx = 10 + ((evt.startMin - 480) / 60) * 80;
           const heightPx = ((evt.endMin - evt.startMin) / 60) * 80;
 
@@ -2733,6 +2787,7 @@ END:VCALENDAR`
       const dict = I18N_DICT[currentLang];
       const listWrapper = document.getElementById('list-view-wrapper');
       listWrapper.innerHTML = '';
+      const currentWeekNum = 1 + currentWeekOffset;
 
       if (selectedMemberIds.length === 0) {
         listWrapper.innerHTML = '<div class="empty-slots-msg">' + dict.noMemberPrompt + '</div>';
@@ -2745,7 +2800,7 @@ END:VCALENDAR`
 
         let dayEvents = [];
         selectedMemberIds.forEach(mId => {
-          const events = parsedMemberEvents[mId] || [];
+          const events = getEventsForWeek(mId, currentWeekNum);
           events.filter(e => e.dayOfWeek === dayIdx).forEach(e => dayEvents.push(e));
         });
 
@@ -2882,6 +2937,7 @@ END:VCALENDAR`
       const dashboard = document.getElementById('analysis-dashboard');
       dashboard.innerHTML = '';
       computedFreeSlotsByDay = {};
+      const currentWeekNum = 1 + currentWeekOffset;
 
       if (selectedMemberIds.length === 0) {
         dashboard.innerHTML = '<div class="empty-slots-msg" style="grid-column: 1 / -1;">' + dict.noMemberPrompt + '</div>';
@@ -2898,7 +2954,7 @@ END:VCALENDAR`
 
         let busyIntervals = [];
         selectedMemberIds.forEach(mId => {
-          const events = parsedMemberEvents[mId] || [];
+          const events = getEventsForWeek(mId, currentWeekNum);
           events.filter(e => e.dayOfWeek === dayIdx).forEach(e => {
             busyIntervals.push({ start: e.startMin, end: e.endMin });
           });
