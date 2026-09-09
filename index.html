@@ -1,0 +1,3110 @@
+<!DOCTYPE html>
+
+
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>一早擰乾了淚水 | 課表比對系統</title>
+  <!-- 引入 Inter 高清晰度英文字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- 引入 html2canvas 庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+
+  <style>
+    /* 絕區零 (Zenless Zone Zero) 潮酷特化視覺主題 */
+    :root {
+      --zzz-yellow: #e6ff00;
+      --zzz-yellow-dark: #ccdf00;
+      --zzz-black: #0d0f12;
+      --zzz-dark-grey: #15181e;
+      --zzz-card-bg: #1c2028;
+      --zzz-border: #2e3543;
+      --zzz-text: #f3f4f6;
+      --zzz-text-muted: #9ca3af;
+
+      --primary: var(--zzz-yellow);
+      --primary-dark: var(--zzz-yellow-dark);
+      --primary-glow: rgba(230, 255, 0, 0.55);
+      --bg: var(--zzz-black);
+      --card-bg: var(--zzz-card-bg);
+      --card-inner-bg: var(--zzz-dark-grey);
+      --text: var(--zzz-text);
+      --text-muted: var(--zzz-text-muted);
+      --border: var(--zzz-border);
+
+      --today-bg: rgba(230, 255, 0, 0.08);
+      --today-border: var(--primary);
+      --today-badge-bg: var(--primary);
+      --today-badge-text: #000000;
+
+      --analysis-card-bg: #1c2028;
+      --analysis-card-border: #2e3543;
+      --analysis-header-bg: #14171d;
+      --analysis-status-bg: rgba(230, 255, 0, 0.15);
+      --analysis-status-text: var(--primary);
+      --analysis-badge-bg: rgba(34, 197, 94, 0.12);
+      --analysis-badge-border: #22c55e;
+      --analysis-badge-text: #4ade80;
+
+      --free-overlay-bg: rgba(230, 255, 0, 0.22);
+      --free-overlay-border: var(--primary);
+      --free-overlay-text: var(--primary);
+
+      --hour-height: 80px;
+    }
+
+    /* 霓虹藍主題 */
+    body.theme-blue {
+      --zzz-yellow: #00f0ff;
+      --zzz-yellow-dark: #00b8cc;
+      --primary: #00f0ff;
+      --primary-dark: #00b8cc;
+      --primary-glow: rgba(0, 240, 255, 0.55);
+      --today-bg: rgba(0, 240, 255, 0.1);
+      --today-border: var(--primary);
+      --today-badge-bg: var(--primary);
+      --today-badge-text: #000000;
+
+      --analysis-status-bg: rgba(0, 240, 255, 0.15);
+      --analysis-status-text: var(--primary);
+      --free-overlay-bg: rgba(0, 240, 255, 0.25);
+      --free-overlay-border: var(--primary);
+      --free-overlay-text: var(--primary);
+    }
+
+    /* 櫻花淺粉主題 */
+    body.theme-pink {
+      --zzz-yellow: #ffd6e8;
+      --zzz-yellow-dark: #f472b6;
+      --primary: #ffd6e8;
+      --primary-dark: #f472b6;
+      --primary-glow: rgba(255, 214, 232, 0.65);
+      --today-bg: rgba(255, 214, 232, 0.15);
+      --today-border: var(--primary);
+      --today-badge-bg: var(--primary);
+      --today-badge-text: #000000;
+
+      --analysis-status-bg: rgba(255, 214, 232, 0.2);
+      --analysis-status-text: var(--primary);
+      --free-overlay-bg: rgba(255, 214, 232, 0.3);
+      --free-overlay-border: var(--primary);
+      --free-overlay-text: var(--primary);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      max-width: 100%;
+      margin: 16px auto;
+      padding: 0 16px 40px 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(230, 255, 0, 0.05), transparent 70%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+      position: relative;
+    }
+
+    /* Diegetic Screen Corner Tactical Markers */
+    body::before {
+      content: '✦ SH1T_HUB_V1.0 // SEC_01';
+      position: fixed;
+      bottom: 8px;
+      left: 16px;
+      font-size: 0.65rem;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 1px;
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    #hud-bottom-right {
+      position: fixed;
+      bottom: 8px;
+      right: 16px;
+      font-size: 0.65rem;
+      font-weight: 900;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 100;
+      background: rgba(13, 15, 18, 0.85);
+      padding: 2px 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* 通用按鈕與膠囊 */
+    button, .member-chip, .custom-select-trigger, .custom-option {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    button:active, .member-chip:active, .custom-select-trigger:active {
+      transform: scale(0.95) !important;
+    }
+
+    /* 頂部設定列 */
+    .top-settings-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .top-settings-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .setting-btn-group {
+      display: inline-flex;
+      background: var(--zzz-dark-grey);
+      border: 1.5px solid var(--border);
+      padding: 3px;
+      gap: 4px;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      position: relative;
+    }
+
+    .setting-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .setting-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .setting-btn.active {
+      background: var(--primary);
+      color: #000000;
+      font-weight: 900;
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
+    /* 頂部 Hero Diegetic HUD 風格面板 */
+    .hero-header {
+      background: #14171d;
+      border: 2px solid var(--primary);
+      padding: 24px 30px;
+      margin-bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      position: relative;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+      box-shadow: 0 0 25px var(--primary-glow);
+      animation: fadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hero-header::before {
+      content: "[HUD_SYS_ONLINE :: SIGNAL_100%]";
+      position: absolute;
+      top: 6px;
+      right: 14px;
+      font-size: 0.65rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--primary);
+      opacity: 0.85;
+    }
+
+    .hero-header::after {
+      content: "◢";
+      position: absolute;
+      bottom: 4px;
+      left: 8px;
+      font-size: 0.75rem;
+      color: var(--primary);
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-title h1 {
+      font-size: 1.85rem;
+      margin: 0 0 4px 0;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hero-title p {
+      margin: 0;
+      opacity: 0.85;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #d1d5db;
+      letter-spacing: 0.5px;
+    }
+
+    .date-tiles-container {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .date-tile {
+      background: #1e222b;
+      border: 1px solid var(--primary);
+      padding: 10px 18px;
+      text-align: center;
+      min-width: 95px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: border-color 0.3s ease;
+      position: relative;
+    }
+
+    .date-tile::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 4px;
+      height: 4px;
+      background: var(--primary);
+    }
+
+    .date-tile .tile-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--primary);
+      font-weight: 800;
+      display: block;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+      transition: color 0.3s ease;
+    }
+
+    .date-tile .tile-value {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    /* 絕區零卡片通用設計 */
+    .section-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 24px;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+      animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      transition: filter 0.4s ease, opacity 0.4s ease;
+      overflow: visible !important;
+    }
+
+    .section-card::before {
+      content: '◤';
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.65rem;
+      color: var(--primary);
+      opacity: 0.6;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-top: 0;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      letter-spacing: -0.3px;
+      color: #ffffff;
+    }
+
+    .section-title-tag {
+      color: var(--primary);
+      margin-right: 8px;
+      transition: color 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    /* 成員選擇膠囊 */
+    .member-chips-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .member-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px 6px 8px;
+      background: var(--zzz-dark-grey);
+      border: 1.5px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.9rem;
+      user-select: none;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+
+    .member-chip .avatar-circle {
+      padding: 2px 6px;
+      background: var(--chip-color, var(--primary));
+      color: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.78rem;
+      border-radius: 2px;
+      letter-spacing: -0.5px;
+    }
+
+    .member-chip:hover {
+      border-color: var(--chip-color, var(--primary));
+      transform: translateY(-2px);
+    }
+
+    @keyframes memberPulse {
+      0% {
+        box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 18px var(--chip-color, var(--primary)), 0 0 28px var(--primary-glow);
+        transform: scale(1.04);
+      }
+      100% {
+        box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+        transform: scale(1);
+      }
+    }
+
+    .member-chip.selected {
+      border-color: var(--chip-color, var(--primary));
+      background: #252a36;
+      color: #ffffff;
+      animation: memberPulse 2.2s infinite ease-in-out;
+    }
+
+    .btn-chip-action {
+      border: 1px solid var(--border);
+      background: var(--zzz-dark-grey);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .btn-chip-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* 控制列 */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .view-mode-toggle {
+      display: inline-flex;
+      background: var(--zzz-dark-grey);
+      border: 1px solid var(--border);
+      padding: 3px;
+      gap: 2px;
+      margin-right: 8px;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .view-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+    }
+
+    .view-btn.active {
+      background: var(--primary);
+      color: #000000;
+      font-weight: 900;
+    }
+
+    .btn {
+      background-color: var(--zzz-dark-grey);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #000000;
+      border-color: var(--primary);
+      font-weight: 900;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      color: #000000;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .btn-warning {
+      border-color: #f87171;
+      color: #f87171;
+    }
+
+    .btn-warning:hover {
+      background-color: rgba(248, 113, 113, 0.15);
+      border-color: #ef4444;
+      color: #ffffff;
+    }
+
+    /* 戰術網格課表 (徹底解決 3D 傾斜邊緣陷落、時間軸拉寬 115px、單行不折疊) */
+    .timetable-wrapper {
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: hidden !important;
+      touch-action: pan-x;
+      border: 1.5px solid var(--border);
+      background: var(--card-bg);
+      perspective: 2500px;
+      perspective-origin: 50% 50%;
+      position: relative;
+      padding-bottom: 2px;
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+    }
+
+    .timetable-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 15;
+      opacity: 0.2;
+    }
+
+    /* SVG 戰術連線層 */
+    .tactical-svg-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999999;
+      transform: translateZ(120px);
+    }
+
+    .timetable-header-grid {
+      display: grid;
+      grid-template-columns: 115px repeat(6, minmax(0, 1fr));
+      width: 100%;
+      background: var(--zzz-dark-grey);
+      border-bottom: 1.5px solid var(--border);
+      position: relative;
+      z-index: 20;
+    }
+
+    .grid-header-cell {
+      padding: 14px 6px;
+      text-align: center;
+      font-weight: 900;
+      font-size: 0.9rem;
+      border-right: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .grid-header-cell:last-child {
+      border-right: none;
+    }
+
+    .grid-header-cell.is-today {
+      background: var(--today-bg);
+      color: var(--primary);
+    }
+
+    .grid-header-cell.is-today .today-pill {
+      background: var(--primary);
+      color: #000000;
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      margin-left: 4px;
+      font-weight: 900;
+    }
+
+    .timetable-body-grid {
+      display: grid;
+      grid-template-columns: 115px repeat(6, minmax(0, 1fr));
+      width: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(0deg) rotateY(0deg) scale(1);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: visible !important;
+      margin-top: 0px;
+    }
+
+    .time-axis-col {
+      display: flex;
+      flex-direction: column;
+      background: var(--zzz-dark-grey);
+      border-right: 1.5px solid var(--border);
+      z-index: 8;
+      padding-top: 10px;
+    }
+
+    .time-axis-cell {
+      height: var(--hour-height);
+      border-bottom: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 800;
+      white-space: nowrap;
+      padding: 0 4px;
+    }
+
+    .day-column {
+      position: relative;
+      height: calc(14 * var(--hour-height) + 10px);
+      padding-top: 10px;
+      border-right: 1px solid var(--border);
+      transition: background-color 0.3s ease, z-index 0.1s ease;
+      transform-style: preserve-3d;
+      overflow: visible !important;
+      z-index: 1;
+    }
+
+    .day-column:hover,
+    .day-column:focus-within,
+    .day-column:has(.grid-event-card:hover),
+    .day-column:has(.grid-event-card.focused-card) {
+      z-index: 999999 !important;
+    }
+
+    .day-column:last-child {
+      border-right: none;
+    }
+
+    .day-column.is-today {
+      background-color: var(--today-bg);
+    }
+
+    .hour-line {
+      height: var(--hour-height);
+      border-bottom: 1px dashed var(--border);
+    }
+
+    @keyframes cardEnter {
+      from {
+        opacity: 0;
+        transform: translateZ(0px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateZ(10px) scale(1);
+      }
+    }
+
+    .grid-event-card {
+      position: absolute;
+      padding: 0;
+      font-size: 0.78rem;
+      overflow: visible !important;
+      cursor: pointer;
+      z-index: 5;
+      transform-style: preserve-3d;
+      transform: translateZ(10px);
+      animation: cardEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: top 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  left 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.3s ease,
+                  transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  z-index 0.1s ease;
+    }
+
+    /* 懸停預備效果 */
+    .grid-event-card:hover {
+      z-index: 9999999 !important;
+      transform: translateZ(50px) scale(1.03);
+    }
+
+    /* 點擊多選聚焦時的 3D Z 軸前浮彈出與平滑過渡 */
+    .grid-event-card.focused-card {
+      z-index: 99999999 !important;
+      transform: translateZ(var(--card-z-offset, 110px)) scale(1.04) !important;
+    }
+
+    .grid-event-card.focused-card:hover {
+      transform: translateZ(calc(var(--card-z-offset, 110px) + 20px)) scale(1.06) !important;
+    }
+
+    .card-inner-base {
+      width: 100%;
+      height: 100%;
+      padding: 6px 8px;
+      border-left: 4px solid var(--event-color, var(--primary));
+      background: var(--event-bg, #252a36);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: transform 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      transform-origin: top left;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+    }
+
+    .grid-event-card:hover .card-inner-base {
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.95), 0 0 25px var(--event-color, var(--primary-glow));
+    }
+
+    .grid-event-card.focused-card .card-inner-base {
+      border-left-width: 6px;
+      box-shadow: 0 28px 65px rgba(0, 0, 0, 0.98), 
+                  0 0 40px var(--event-color, var(--primary-glow));
+      outline: 2px solid var(--primary);
+    }
+
+    .sticky-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.85);
+      color: var(--primary);
+      padding: 2px 6px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-left: 2px solid var(--primary);
+    }
+
+    .event-card-title {
+      font-weight: 800;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      color: #ffffff;
+    }
+
+    /* 3D 純文字戰術懸浮倒數指示標籤 (智慧避讓定位：靠近頂部/向上彈窗時置於底部，其餘置於頂部) */
+    .diegetic-single-text-hud {
+      position: absolute;
+      left: 0;
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow), 0 4px 10px rgba(0,0,0,0.9);
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 100000000 !important;
+      transform: translateZ(140px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(13, 15, 18, 0.96);
+      padding: 3px 9px;
+      border: 1.5px solid var(--primary);
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.9);
+      transition: top 0.35s cubic-bezier(0.16, 1, 0.3, 1), bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* 精緻懸停 Popover 彈框 */
+    .hover-popover {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: max(calc(100% + 12px), 240px);
+      min-height: max(calc(100% + 12px), 120px);
+      background: #10131a !important;
+      border: 2.5px solid var(--event-color, var(--primary));
+      padding: 14px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.98), 0 0 30px var(--event-color, var(--primary-glow));
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateZ(10px) scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, visibility 0.2s ease;
+      z-index: 9999999 !important;
+      color: var(--text);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+
+    .hover-popover.pop-left {
+      left: auto;
+      right: -6px;
+    }
+
+    .hover-popover.pop-up {
+      top: auto;
+      bottom: -6px;
+    }
+
+    /* 懸停/聚焦時順暢展開 */
+    .grid-event-card:hover .hover-popover,
+    .grid-event-card.focused-card .hover-popover {
+      opacity: 1;
+      visibility: visible;
+      transform: translateZ(85px) scale(1.03) !important;
+    }
+
+    .grid-event-card:hover .card-inner-base,
+    .grid-event-card.focused-card .card-inner-base {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    .popover-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: var(--event-color, var(--primary));
+      color: #000000;
+      font-weight: 900;
+      font-size: 0.78rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    .popover-title {
+      font-size: 0.98rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      line-height: 1.35;
+      color: #ffffff;
+    }
+
+    .popover-detail {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    /* 每日清單檢視 */
+    .list-view-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .list-day-card {
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--card-bg);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      animation: slideUpFade 0.35s ease forwards;
+    }
+
+    .list-day-header {
+      background: var(--zzz-dark-grey);
+      padding: 14px 20px;
+      font-weight: 900;
+      font-size: 0.98rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--primary);
+    }
+
+    .list-events-body {
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .list-event-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      background: var(--zzz-dark-grey);
+      border-left: 5px solid var(--event-color, var(--primary));
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+      transition: transform 0.2s ease;
+    }
+
+    .list-event-item:hover {
+      transform: translateX(4px);
+    }
+
+    .list-time-badge {
+      background: #14171d;
+      border: 1px solid var(--primary);
+      padding: 6px 12px;
+      font-weight: 900;
+      font-size: 0.82rem;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .list-event-info {
+      flex: 1;
+    }
+
+    .list-event-title {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .list-event-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 14px;
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    /* 網格空閒圖層 Overlay */
+    .free-overlay-block {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      background: var(--free-overlay-bg);
+      border: 2px dashed var(--free-overlay-border);
+      color: var(--free-overlay-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.8rem;
+      z-index: 2;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      transform: translateZ(12px);
+    }
+
+    /* 自訂 Popover 下拉選單組件 */
+    .custom-select-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      min-width: 0;
+    }
+
+    .custom-select-label {
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .custom-select-trigger {
+      background: var(--zzz-dark-grey);
+      border: 1.5px solid var(--border);
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+
+    .custom-select-trigger:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .custom-select-trigger span:first-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .custom-select-options {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 100%;
+      min-width: 200px;
+      background: #14171d;
+      border: 1.5px solid var(--primary);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.85);
+      padding: 6px;
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+
+    .custom-select-options.open {
+      display: flex;
+      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-6px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .custom-option {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .custom-option:hover {
+      background: var(--zzz-dark-grey);
+      color: var(--primary);
+    }
+
+    .custom-option.selected {
+      background: var(--primary);
+      color: #000000;
+      font-weight: 900;
+    }
+
+    /* 共同空閒時間比對分析 */
+    .analysis-controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .analysis-dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .day-analysis-card {
+      background: var(--analysis-card-bg);
+      border: 1px solid var(--analysis-card-border);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      animation: slideUpFade 0.35s ease forwards;
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .day-analysis-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--analysis-card-border);
+    }
+
+    .day-analysis-title {
+      font-weight: 900;
+      font-size: 0.98rem;
+      color: var(--primary);
+    }
+
+    .day-status-pill {
+      font-size: 0.74rem;
+      font-weight: 900;
+      padding: 4px 10px;
+      background: var(--analysis-status-bg);
+      color: var(--analysis-status-text);
+      border: 1px solid var(--primary);
+    }
+
+    .free-slots-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .free-slot-item {
+      background: var(--analysis-badge-bg);
+      border: 1px solid var(--analysis-badge-border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--analysis-badge-text);
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .empty-slots-msg {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 18px 0;
+      font-weight: 600;
+    }
+
+    /* PNG 導出 Modal 彈框樣式 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 99999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .export-modal {
+      background: #14171d;
+      border: 2px solid var(--primary);
+      width: 90%;
+      max-width: 500px;
+      padding: 24px 28px;
+      box-shadow: 0 0 35px var(--primary-glow);
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+      position: relative;
+    }
+
+    .export-modal h3 {
+      margin: 0 0 12px 0;
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .export-modal p {
+      margin: 0 0 20px 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .export-option-card {
+      background: var(--zzz-dark-grey);
+      border: 1.5px solid var(--border);
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: all 0.2s ease;
+    }
+
+    .export-option-card:hover, .export-option-card.selected {
+      border-color: var(--primary);
+      background: #202632;
+    }
+
+    .export-option-card.selected {
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .export-option-title {
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .export-option-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    /* 手機移動端優化 Mobile Responsive Enhancements */
+    @media (max-width: 768px) {
+      body {
+        padding: 0 10px 40px 10px;
+      }
+      .hero-header {
+        padding: 16px 18px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .date-tiles-container {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .date-tile {
+        min-width: 70px;
+        padding: 6px 10px;
+      }
+      .date-tile .tile-value {
+        font-size: 1rem;
+      }
+      .controls-row {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .timetable-wrapper {
+        border-width: 1px;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .timetable-header-grid,
+      .timetable-body-grid {
+        min-width: 750px; /* 手機端保留充足寬度與順暢橫向滾動 */
+      }
+      #hud-bottom-right {
+        display: none; /* 手機下隱藏右下角數據，節省螢幕空間 */
+      }
+    }
+  </style>
+
+
+</head>
+<body>
+
+
+  <!-- 底欄真實動態 HUD 數據標籤 -->
+
+
+  <div id="hud-bottom-right">SYS_TIME: --:--:-- // SELECTED: 0 MEM // FREQ: 60Hz</div>
+
+
+  <!-- 頂部設定列 -->
+
+
+  <div class="top-settings-bar">
+    <div class="setting-btn-group" id="inst-btn-group">
+      <!-- 開學日按鈕 -->
+    </div>
+
+
+<div class="top-settings-right">
+  <div class="setting-btn-group">
+    <button class="setting-btn active" id="theme-yellow-btn" onclick="setTheme('yellow')"># 酸性黃</button>
+    <button class="setting-btn" id="theme-blue-btn" onclick="setTheme('blue')"># 霓虹藍</button>
+    <button class="setting-btn" id="theme-pink-btn" onclick="setTheme('pink')"># 櫻花粉</button>
+  </div>
+
+  <div class="setting-btn-group">
+    <button class="setting-btn active" id="lang-zh-btn" onclick="setLanguage('zh')">繁體中文</button>
+    <button class="setting-btn" id="lang-en-btn" onclick="setLanguage('en')">English</button>
+  </div>
+</div>
+
+
+  </div>
+
+
+  <!-- 頂部 Hero Diegetic HUD 風格面板 -->
+
+
+  <div class="hero-header">
+    <div class="hero-title">
+      <h1 id="i18n-hero-title">一早擰乾了淚水</h1>
+      <p id="i18n-hero-sub">課表比對系統</p>
+    </div>
+    <div class="date-tiles-container">
+      <div class="date-tile">
+        <span class="tile-label" id="i18n-label-today">Date</span>
+        <span class="tile-value" id="hero-today-date">--/--</span>
+      </div>
+      <div class="date-tile">
+        <span class="tile-label" id="i18n-label-weekday">Day</span>
+        <span class="tile-value" id="hero-weekday">--</span>
+      </div>
+      <div class="date-tile">
+        <span class="tile-label" id="i18n-label-term">Term</span>
+        <span class="tile-value" id="hero-term">Sem 1</span>
+      </div>
+      <div class="date-tile">
+        <span class="tile-label" id="i18n-label-week">Week</span>
+        <span class="tile-value" id="hero-week-num">W1</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 第一區塊：成員選擇 -->
+
+
+  <div class="section-card" id="card-section-members">
+    <div class="section-title">
+      <span><span class="section-title-tag">::01</span><span id="i18n-title-members">選擇預設成員（可多選進行對比）</span></span>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-chip-action" onclick="selectAllMembers()" id="i18n-btn-select-all">+ 全選成員</button>
+        <button class="btn-chip-action" onclick="clearSelectedMembers()" id="i18n-btn-clear">× 取消全選</button>
+      </div>
+    </div>
+    <div class="member-chips-bar" id="member-chips-container">
+      <!-- 動態載入成員膠囊 -->
+    </div>
+  </div>
+
+
+  <!-- 第二區塊：課表檢視網格與清單 -->
+
+
+  <div class="section-card" id="export-section-schedule">
+    <div class="section-title">
+      <span><span class="section-title-tag">::02</span><span id="i18n-title-schedule">課表檢視</span></span>
+      <div class="controls-row">
+        <div class="view-mode-toggle">
+          <button class="view-btn active" id="view-grid-btn" onclick="setViewMode('grid')">⊞ 週曆網格</button>
+          <button class="view-btn" id="view-list-btn" onclick="setViewMode('list')">☰ 每日清單</button>
+        </div>
+        <button class="btn" onclick="changeWeek(-1)" id="i18n-btn-prev">◄ 上一週</button>
+        <span style="font-weight: 900; font-size: 0.95rem; min-width: 130px; text-align: center; color: var(--primary);" id="current-week-display">第 1 週</span>
+        <button class="btn" onclick="changeWeek(1)" id="i18n-btn-next">下一週 ►</button>
+        <button class="btn" onclick="resetToToday()" id="i18n-btn-today">回到今天</button>
+        <button class="btn btn-warning" onclick="clearAllSelectedCards()" id="i18n-btn-clear-cards">× 清除選取</button>
+        <button class="btn btn-primary" onclick="openExportModal()" id="i18n-btn-export-png">📸 儲存課表數據 (PNG)</button>
+      </div>
+    </div>
+
+
+<!-- 網格視圖容器 -->
+<div class="timetable-wrapper" id="grid-view-wrapper">
+  <!-- SVG 戰術連線 -->
+  <svg class="tactical-svg-overlay" id="tactical-svg-overlay"></svg>
+
+  <div class="timetable-header-grid" id="timetable-header-grid">
+    <!-- 網格標題列 -->
+  </div>
+  <div class="timetable-body-grid" id="timetable-body-grid">
+    <!-- 時間刻度與 6 天主體 -->
+  </div>
+</div>
+
+<!-- 清單視圖容器 -->
+<div class="list-view-container" id="list-view-wrapper" style="display: none;">
+  <!-- 動態清單 -->
+</div>
+
+
+  </div>
+
+
+  <!-- 第三區塊：共同空閒時間比對分析 -->
+
+
+  <div class="section-card" id="export-section-analysis">
+    <div class="section-title">
+      <span><span class="section-title-tag">::03</span><span id="i18n-title-analysis">共同空閒時間交叉比對分析</span></span>
+      <button class="btn btn-primary" onclick="toggleFreeOverlay()" id="i18n-btn-overlay">⚡ 網格高亮空閒時間</button>
+    </div>
+
+
+<!-- 分析控制項 -->
+<div class="analysis-controls-grid">
+  <div class="custom-select-group">
+    <label class="custom-select-label" id="i18n-lbl-target-day">▸ 分析特定星期</label>
+    <div class="custom-select-trigger" onclick="toggleCustomSelect('select-day-options')">
+      <span id="select-day-text">全部星期 (週一至週六)</span>
+      <span>▼</span>
+    </div>
+    <div class="custom-select-options" id="select-day-options"></div>
+  </div>
+
+  <div class="custom-select-group">
+    <label class="custom-select-label" id="i18n-lbl-start-time">▸ 每日起始時間</label>
+    <div class="custom-select-trigger" onclick="toggleCustomSelect('select-start-options')">
+      <span id="select-start-text">09:00 AM</span>
+      <span>▼</span>
+    </div>
+    <div class="custom-select-options" id="select-start-options"></div>
+  </div>
+
+  <div class="custom-select-group">
+    <label class="custom-select-label" id="i18n-lbl-end-time">◂ 每日結束時間</label>
+    <div class="custom-select-trigger" onclick="toggleCustomSelect('select-end-options')">
+      <span id="select-end-text">10:00 PM (22:00)</span>
+      <span>▼</span>
+    </div>
+    <div class="custom-select-options" id="select-end-options"></div>
+  </div>
+
+  <div class="custom-select-group">
+    <label class="custom-select-label" id="i18n-lbl-min-dur">⧖ 最少空閒時長</label>
+    <div class="custom-select-trigger" onclick="toggleCustomSelect('select-dur-options')">
+      <span id="select-dur-text">1 小時</span>
+      <span>▼</span>
+    </div>
+    <div class="custom-select-options" id="select-dur-options"></div>
+  </div>
+</div>
+
+<!-- 6天卡片儀表板 -->
+<div class="analysis-dashboard-grid" id="analysis-dashboard">
+  <!-- 6 天卡片 -->
+</div>
+
+
+  </div>
+
+
+  <!-- PNG 匯出對話框 Modal -->
+
+
+  <div class="modal-backdrop" id="export-modal-backdrop">
+    <div class="export-modal">
+      <h3 id="i18n-modal-title">📸 儲存課表數據 (PNG 導出)</h3>
+      <p id="i18n-modal-desc">請選擇欲儲存打包的畫面範圍：</p>
+
+
+  <div class="export-option-card selected" id="opt-sched-only" onclick="selectExportOpt('sched-only')">
+    <div>
+      <div class="export-option-title" id="i18n-opt1-title">▸ 僅保存課表檢視畫面</div>
+      <div class="export-option-desc" id="i18n-opt1-desc">僅導出第二區塊的週曆網格 / 每日清單</div>
+    </div>
+    <span style="color:var(--primary); font-weight:900;">✓</span>
+  </div>
+
+  <div class="export-option-card" id="opt-sched-analysis" onclick="selectExportOpt('sched-analysis')">
+    <div>
+      <div class="export-option-title" id="i18n-opt2-title">▸ 保存課表 + 共同空閒時間交叉比對分析</div>
+      <div class="export-option-desc" id="i18n-opt2-desc">導出完整課表網格及下方的空閒分析儀表板卡片</div>
+    </div>
+    <span></span>
+  </div>
+
+  <div class="modal-actions">
+    <button class="btn" onclick="closeExportModal()" id="i18n-btn-modal-cancel">取消</button>
+    <button class="btn btn-primary" onclick="executeExportPNG()" id="i18n-btn-modal-confirm">確定匯出 PNG</button>
+  </div>
+</div>
+
+
+  </div>
+
+
+  <script>
+    // ==========================================
+    // 1. 全域變數與預設資料
+    // ==========================================
+    let currentLang = 'zh';
+    let currentTheme = 'yellow';
+    let currentViewMode = 'grid';
+    let currentWeekOffset = 0;
+    let selectedMemberIds = [];
+    let isOverlayActive = false;
+    let selectedExportOption = 'sched-only';
+    let selectedCardsList = []; // 多選 3D 課程陣列 [{ el, evt }]
+
+    const INSTITUTIONS = {
+      sep7: { nameZh: '7/9 開學 (HKCC / UOW)', nameEn: '7/9 Start (HKCC / UOW)', date: new Date(2026, 8, 7) },
+      aug31: { nameZh: '31/8 開學 (CUHK / PolyU / 其他)', nameEn: '31/8 Start (CUHK / PolyU / Others)', date: new Date(2026, 7, 31) }
+    };
+
+    let selectedInstKey = 'sep7';
+    let semesterStartDate = INSTITUTIONS.sep7.date;
+
+    let filterDay = 'all';
+    let filterStartHour = 9;
+    let filterEndHour = 22;
+    let filterMinDuration = 60;
+
+    const PRESET_MEMBERS = [
+      {
+        id: 'hino',
+        name: 'Hino',
+        color: '#e6ff00',
+        bg: '#2d3300',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:LC1046-105 Lecture
+LOCATION:Online
+DTSTART;TZID=Asia/Hong_Kong:20260907T083000
+DTEND;TZID=Asia/Hong_Kong:20260907T103000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS2383-A01C Lecture
+LOCATION:WK-S215
+DTSTART;TZID=Asia/Hong_Kong:20260908T170000
+DTEND;TZID=Asia/Hong_Kong:20260908T190000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS1068-A04B Lecture
+LOCATION:WK-S215
+DTSTART;TZID=Asia/Hong_Kong:20260908T190000
+DTEND;TZID=Asia/Hong_Kong:20260908T210000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LC1105-156 Lecture
+LOCATION:Online
+DTSTART;TZID=Asia/Hong_Kong:20260909T143000
+DTEND;TZID=Asia/Hong_Kong:20260909T163000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS1068-A04B Tutorial
+LOCATION:WK-SUG01
+DTSTART;TZID=Asia/Hong_Kong:20260909T200000
+DTEND;TZID=Asia/Hong_Kong:20260909T210000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SSHD1072-A04C Lecture
+LOCATION:WK-S215
+DTSTART;TZID=Asia/Hong_Kong:20260910T083000
+DTEND;TZID=Asia/Hong_Kong:20260910T103000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LC1046-105 Tutorial
+LOCATION:WK-SUG03
+DTSTART;TZID=Asia/Hong_Kong:20260910T103000
+DTEND;TZID=Asia/Hong_Kong:20260910T113000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SSHD1072-A04C Tutorial
+LOCATION:WK-S414
+DTSTART;TZID=Asia/Hong_Kong:20260910T133000
+DTEND;TZID=Asia/Hong_Kong:20260910T143000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LC1105-156 Tutorial
+LOCATION:WK-S1002
+DTSTART;TZID=Asia/Hong_Kong:20260911T113000
+DTEND;TZID=Asia/Hong_Kong:20260911T123000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS2383-A01C Tutorial
+LOCATION:WK-N1103
+DTSTART;TZID=Asia/Hong_Kong:20260911T173000
+DTEND;TZID=Asia/Hong_Kong:20260911T183000
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'gennadius',
+        name: 'Gennadius',
+        color: '#38bdf8',
+        bg: '#0c4a6e',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:ENGLISH FOR ACADEMIC STUDIES I (Lecture)
+LOCATION:Online
+DTSTART;TZID=Asia/Hong_Kong:20260907T103000
+DTEND;TZID=Asia/Hong_Kong:20260907T123000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:GENERAL BIOLOGY (Lecture)
+LOCATION:WK-N201
+DTSTART;TZID=Asia/Hong_Kong:20260909T123000
+DTEND;TZID=Asia/Hong_Kong:20260909T143000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:GENERAL CHEMISTRY I (Tutorial)
+LOCATION:WK-S916
+DTSTART;TZID=Asia/Hong_Kong:20260910T083000
+DTEND;TZID=Asia/Hong_Kong:20260910T093000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:GENERAL BIOLOGY (Tutorial)
+LOCATION:WK-SUG01
+DTSTART;TZID=Asia/Hong_Kong:20260910T103000
+DTEND;TZID=Asia/Hong_Kong:20260910T113000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGLISH FOR ACADEMIC STUDIES I (Tutorial)
+LOCATION:WK-SUG03
+DTSTART;TZID=Asia/Hong_Kong:20260910T133000
+DTEND;TZID=Asia/Hong_Kong:20260910T143000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:GENERAL CHEMISTRY I (Lecture)
+LOCATION:WK-N203
+DTSTART;TZID=Asia/Hong_Kong:20260910T163000
+DTEND;TZID=Asia/Hong_Kong:20260910T183000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:FOUNDATION MATHEMATICS (Lecture)
+LOCATION:WK-N201
+DTSTART;TZID=Asia/Hong_Kong:20260910T190000
+DTEND;TZID=Asia/Hong_Kong:20260910T210000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CRITICAL AND ETHICAL THINKING (Lecture)
+LOCATION:WK-N201
+DTSTART;TZID=Asia/Hong_Kong:20260911T083000
+DTEND;TZID=Asia/Hong_Kong:20260911T103000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CRITICAL AND ETHICAL THINKING (Tutorial)
+LOCATION:WK-S814
+DTSTART;TZID=Asia/Hong_Kong:20260911T123000
+DTEND;TZID=Asia/Hong_Kong:20260911T133000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:FOUNDATION MATHEMATICS (Tutorial)
+LOCATION:WK-S101
+DTSTART;TZID=Asia/Hong_Kong:20260912T180000
+DTEND;TZID=Asia/Hong_Kong:20260912T190000
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'juno',
+        name: 'Juno',
+        color: '#c084fc',
+        bg: '#581c87',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:FH1101 TUT001
+LOCATION:QR512
+DTSTART;TZID=Asia/Hong_Kong:20260908T163000
+DTEND;TZID=Asia/Hong_Kong:20260908T183000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CHC131P
+LOCATION:Z407
+DTSTART;TZID=Asia/Hong_Kong:20260910T123000
+DTEND;TZID=Asia/Hong_Kong:20260910T153000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:DSAI1202
+LOCATION:TU201
+DTSTART;TZID=Asia/Hong_Kong:20260911T083000
+DTEND;TZID=Asia/Hong_Kong:20260911T103000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SN1CN04P
+LOCATION:Z407
+DTSTART;TZID=Asia/Hong_Kong:20260911T113000
+DTEND;TZID=Asia/Hong_Kong:20260911T123000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LEI1101
+LOCATION:HHBUG12
+DTSTART;TZID=Asia/Hong_Kong:20260911T123000
+DTEND;TZID=Asia/Hong_Kong:20260911T153000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CBS1402
+LOCATION:HHBUG10
+DTSTART;TZID=Asia/Hong_Kong:20260911T153000
+DTEND;TZID=Asia/Hong_Kong:20260911T163000
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'jason',
+        name: 'Jason',
+        color: '#fb923c',
+        bg: '#7c2d12',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:ENGG 1110 - E Lecture
+LOCATION:Yasumoto Int'l Acad Park LT3
+DTSTART:20260907T123000
+DTEND:20260907T141500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1040 - E Lecture
+LOCATION:Lady Shaw Bldg LT2
+DTSTART:20260907T153000
+DTEND:20260907T171500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1003 - EA Lecture
+LOCATION:Lady Shaw Bldg C3
+DTSTART:20260908T103000
+DTEND:20260908T121500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1003 - EAL1 Laboratory
+LOCATION:Lady Shaw Bldg C3
+DTSTART:20260908T123000
+DTEND:20260908T131500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CHLT 1001 - FC Lecture
+LOCATION:Wong Foo Yuan Bldg 401
+DTSTART:20260908T143000
+DTEND:20260908T171500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1040 - E Lecture
+LOCATION:T.C. Cheng Bldg C1
+DTSTART:20260909T093000
+DTEND:20260909T101500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1040 - ET01 Interactive Tutorial
+LOCATION:T.C. Cheng Bldg C1
+DTSTART:20260909T103000
+DTEND:20260909T121500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:IERG 1000 - - Lecture
+LOCATION:Yasumoto Int'l Acad Park LT6
+DTSTART:20260909T133000
+DTEND:20260909T151500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:PHED 1021 - E Lecture
+LOCATION:Main Campus
+DTSTART:20260910T103000
+DTEND:20260910T121500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1110 - E Lecture
+LOCATION:Lee Shau Kee Building LT1
+DTSTART:20260910T153000
+DTEND:20260910T161500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGG 1110 - EL01 Laboratory
+LOCATION:Lee Shau Kee Building LT1
+DTSTART:20260910T163000
+DTEND:20260910T171500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:GENA 1000 - AA01 Assembly
+LOCATION:Sir Run Run Shaw Hall
+DTSTART:20260911T113000
+DTEND:20260911T131500
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:GENA 1112 - - Lecture
+LOCATION:Sir Run Run Shaw Hall
+DTSTART:20260911T153000
+DTEND:20260911T171500
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'kelvin',
+        name: 'Kelvin',
+        color: '#f43f5e',
+        bg: '#881337',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:LC1105-162 Lecture
+LOCATION:Online
+DTSTART:20260908T110000
+DTEND:20260908T130000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LC1066-111 Lecture
+LOCATION:WK-N1306
+DTSTART:20260909T103000
+DTEND:20260909T123000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SSHD1072-A09B Lecture
+LOCATION:WK-S213
+DTSTART:20260909T123000
+DTEND:20260909T143000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SSHD1072-A09B Tutorial
+LOCATION:WK-S814
+DTSTART:20260909T153000
+DTEND:20260909T163000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LC1066-111 Tutorial Online
+LOCATION:Online
+DTSTART:20260910T133000
+DTEND:20260910T153000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:LC1105-162 Tutorial
+LOCATION:WK-S202
+DTSTART:20260911T150000
+DTEND:20260911T160000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS1068-A03A Lecture
+LOCATION:WK-N201
+DTSTART:20260911T190000
+DTEND:20260911T210000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS1068-A03A Tutorial
+LOCATION:WK-N201
+DTSTART:20260911T210000
+DTEND:20260911T220000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS2382-A05C Tutorial
+LOCATION:WK-N1113
+DTSTART:20260912T103000
+DTEND:20260912T113000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SEHS2383-A05C Lecture
+LOCATION:WK-S215
+DTSTART:20260912T120000
+DTEND:20260912T140000
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'tenson',
+        name: 'Tenson',
+        color: '#2dd4bf',
+        bg: '#134e4a',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:AST 10202
+DTSTART:20260907T090000
+DTEND:20260907T105000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10202
+DTSTART:20260907T110000
+DTEND:20260907T115000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10111
+DTSTART:20260907T140000
+DTEND:20260907T155000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10111
+DTSTART:20260907T160000
+DTEND:20260907T165000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10107
+DTSTART:20260908T110000
+DTEND:20260908T125000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10107
+DTSTART:20260908T140000
+DTEND:20260908T145000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CGE 1000
+DTSTART:20260909T090000
+DTEND:20260909T095000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10304
+DTSTART:20260910T090000
+DTEND:20260910T105000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:AST 10304
+DTSTART:20260910T120000
+DTEND:20260910T125000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:CGE 1000
+DTSTART:20260910T140000
+DTEND:20260910T155000
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'enoch',
+        name: 'Enoch',
+        color: '#f87171',
+        bg: '#7f1d1d',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:PHSI 2502NEF - L01 FT Lecture
+DTSTART:20260901T090000
+DTEND:20260901T115000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGL 1101AEF - L55 FT Lecture
+DTSTART:20260901T160000
+DTEND:20260901T175000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:PHSI 2502NEF - L01 FT Lecture
+DTSTART:20260903T090000
+DTEND:20260903T115000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:ENGL 1101AEF - T55 FT Tutorial
+DTSTART:20260904T090000
+DTEND:20260904T095000
+END:VEVENT
+END:VCALENDAR`
+      },
+      {
+        id: 'kim',
+        name: 'Kim',
+        color: '#f472b6',
+        bg: '#831843',
+        text: '#ffffff',
+        ics: `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:Chinese and Western Modes of Thought (HUMN2007)
+LOCATION:DLB411
+DTSTART;TZID=Asia/Hong_Kong:20260907T093000
+DTEND;TZID=Asia/Hong_Kong:20260907T122000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Win the Games! (GFQR1065)
+LOCATION:AST916
+DTSTART;TZID=Asia/Hong_Kong:20260907T143000
+DTEND;TZID=Asia/Hong_Kong:20260907T162000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:The Individual and Society (GFCC1037)
+LOCATION:SCT501
+DTSTART;TZID=Asia/Hong_Kong:20260908T093000
+DTEND;TZID=Asia/Hong_Kong:20260908T122000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:University Chinese (UCLC1005)
+LOCATION:OEM602
+DTSTART;TZID=Asia/Hong_Kong:20260908T133000
+DTEND;TZID=Asia/Hong_Kong:20260908T142000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:University Life (ULIF1005)
+LOCATION:Not specified
+DTSTART;TZID=Asia/Hong_Kong:20260908T143000
+DTEND;TZID=Asia/Hong_Kong:20260908T162000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:University Chinese (UCLC1005)
+LOCATION:OEM905
+DTSTART;TZID=Asia/Hong_Kong:20260909T163000
+DTEND;TZID=Asia/Hong_Kong:20260909T182000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Win the Games! (GFQR1065)
+LOCATION:DLB411
+DTSTART;TZID=Asia/Hong_Kong:20260910T093000
+DTEND;TZID=Asia/Hong_Kong:20260910T102000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Invitation to Social Sciences (SOSC1006)
+LOCATION:CVA203
+DTSTART;TZID=Asia/Hong_Kong:20260910T133000
+DTEND;TZID=Asia/Hong_Kong:20260910T152000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:History, Heritage and Human Communities (HIST1405)
+LOCATION:SCM012
+DTSTART;TZID=Asia/Hong_Kong:20260911T083000
+DTEND;TZID=Asia/Hong_Kong:20260911T112000
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Enhancing English through Global Citizenship (LANG0036)
+LOCATION:WYS614
+DTSTART;TZID=Asia/Hong_Kong:20260911T133000
+DTEND;TZID=Asia/Hong_Kong:20260911T152000
+END:VEVENT
+END:VCALENDAR`
+      }
+    ];
+
+    let parsedMemberEvents = {};
+
+    function getMemberInitials(name) {
+      if (!name) return '?';
+      const firstChar = name.charAt(0).toUpperCase();
+      const count = PRESET_MEMBERS.filter(m => m.name.charAt(0).toUpperCase() === firstChar).length;
+      if (count > 1) {
+        return name.substring(0, 2).toUpperCase();
+      }
+      return firstChar;
+    }
+
+    const I18N_DICT = {
+      zh: {
+        heroTitle: '一早擰乾了淚水',
+        heroSub: '課表比對系統',
+        today: 'Date',
+        weekday: 'Weekday',
+        term: 'Term',
+        week: 'Week',
+        themeYellow: '# 酸性黃',
+        themeBlue: '# 霓虹藍',
+        themePink: '# 櫻花粉',
+        titleMembers: '選擇預設成員（可多選進行對比）',
+        btnSelectAll: '+ 全選成員',
+        btnClear: '× 取消全選',
+        titleSchedule: '課表檢視',
+        btnPrev: '◄ 上一週',
+        btnNext: '下一週 ►',
+        btnToday: '回到今天',
+        btnClearCards: '× 清除選取',
+        btnExportPng: '📸 儲存課表數據 (PNG)',
+        titleAnalysis: '共同空閒時間交叉比對分析',
+        btnOverlay: '⚡ 網格高亮空閒時間',
+        btnHideOverlay: '× 取消網格高亮',
+        targetDay: '▸ 分析特定星期',
+        startTime: '▸ 每日起始時間',
+        endTime: '◂ 每日結束時間',
+        minDur: '⧖ 最少空閒時長',
+        weekdays: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+        allWeekdays: '全部星期 (週一至週六)',
+        availableSlots: '個時段可配合',
+        allBusy: '全天忙碌 / 無符合時段',
+        noMemberPrompt: '請在上方點擊選取成員以顯示課表與交叉分析',
+        todayTag: 'TODAY',
+        timeColLabel: 'TIME',
+        viewGridLabel: '⊞ 週曆網格',
+        viewListLabel: '☰ 每日清單',
+        freeLabel: 'FREE',
+        modalTitle: '📸 儲存課表數據 (PNG 導出)',
+        modalDesc: '請選擇欲儲存打包的畫面範圍：',
+        opt1Title: '▸ 僅保存課表檢視畫面',
+        opt1Desc: '僅導出第二區塊的週曆網格 / 每日清單',
+        opt2Title: '▸ 保存課表 + 共同空閒時間交叉比對分析',
+        opt2Desc: '導出完整課表網格及下方的空閒分析儀表板卡片',
+        modalCancel: '取消',
+        modalConfirm: '確定匯出 PNG',
+        statusInProgress: '▶ 課堂進行中',
+        statusFinished: '✓ 課程已結束',
+        untilStart: '後開課',
+        gapLabel: '⧖ 間隔: ',
+        overlapLabel: '⚠️ 時段重疊',
+        diffDayGap: '📅 跨日: '
+      },
+      en: {
+        heroTitle: 'Wringing Out Tears First Thing in the Morning',
+        heroSub: 'Schedule Comparison System',
+        today: 'Date',
+        weekday: 'Day',
+        term: 'Term',
+        week: 'Week',
+        themeYellow: '# ACID YELLOW',
+        themeBlue: '# NEON BLUE',
+        themePink: '# PINK',
+        titleMembers: 'SELECT MEMBERS (MULTI-SELECT TO COMPARE)',
+        btnSelectAll: '+ SELECT ALL',
+        btnClear: '× CLEAR ALL',
+        titleSchedule: 'SCHEDULE VIEW',
+        btnPrev: '◄ PREV',
+        btnNext: 'NEXT ►',
+        btnToday: 'TODAY',
+        btnClearCards: '× CLEAR SELECTION',
+        btnExportPng: '📸 SAVE DATA (PNG)',
+        titleAnalysis: 'COMMON FREE TIME ANALYSIS',
+        btnOverlay: '⚡ OVERLAY FREE TIME',
+        btnHideOverlay: '× HIDE OVERLAY',
+        targetDay: '▸ FILTER WEEKDAY',
+        startTime: '▸ DAILY START TIME',
+        endTime: '◂ DAILY END TIME',
+        minDur: '⧖ MIN FREE DURATION',
+        weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        allWeekdays: 'All Weekdays (Mon-Sat)',
+        availableSlots: 'Slot(s) Available',
+        allBusy: 'No Matching Free Time',
+        noMemberPrompt: 'Please select member(s) above to display schedule & comparison analysis',
+        todayTag: 'TODAY',
+        timeColLabel: 'TIME',
+        viewGridLabel: '⊞ GRID VIEW',
+        viewListLabel: '☰ LIST VIEW',
+        freeLabel: 'FREE',
+        modalTitle: '📸 SAVE SCHEDULE DATA (PNG EXPORT)',
+        modalDesc: 'Select export capture scope:',
+        opt1Title: '▸ Save Schedule View Only',
+        opt1Desc: 'Exports grid or list timetable section',
+        opt2Title: '▸ Save Schedule + Free Time Analysis',
+        opt2Desc: 'Exports timetable grid along with analysis dashboard below',
+        modalCancel: 'Cancel',
+        modalConfirm: 'Export PNG',
+        statusInProgress: '▶ IN PROGRESS',
+        statusFinished: '✓ CLASS FINISHED',
+        untilStart: 'until start',
+        gapLabel: '⧖ GAP: ',
+        overlapLabel: '⚠️ OVERLAP',
+        diffDayGap: '📅 SPAN: '
+      }
+    };
+
+    // ==========================================
+    // 2. 初始化 & 多選 3D 戰術傾斜與 SVG Diegetic 連線
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      parseAllPresets();
+      renderInstButtons();
+      renderMemberChips();
+      resetToTodayCalculated();
+      setupCustomSelectOptions();
+      initRealHudClock();
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select-group')) {
+          document.querySelectorAll('.custom-select-options').forEach(el => el.classList.remove('open'));
+        }
+        if (!e.target.closest('.grid-event-card') && 
+            !e.target.closest('.diegetic-single-text-hud') && 
+            !e.target.closest('#i18n-btn-clear-cards')) {
+          clearAllSelectedCards();
+        }
+      });
+    });
+
+    function initRealHudClock() {
+      setInterval(() => {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0];
+        const weekNum = 1 + currentWeekOffset;
+        const hudEl = document.getElementById('hud-bottom-right');
+        if (hudEl) {
+          hudEl.innerText = 'SYS_TIME: ' + timeStr + ' // SELECTED: ' + selectedMemberIds.length + ' MEM // W' + weekNum + ' // FREQ: 60Hz';
+        }
+      }, 1000);
+    }
+
+    function toggleCardMultiSelection(cardEl, evtObj, event) {
+      event.stopPropagation();
+
+      const existingIndex = selectedCardsList.findIndex(item => item.el === cardEl);
+      if (existingIndex >= 0) {
+        selectedCardsList.splice(existingIndex, 1);
+        cardEl.classList.remove('focused-card');
+        const oldHud = cardEl.querySelector('.diegetic-single-text-hud');
+        if (oldHud) oldHud.remove();
+      } else {
+        const zOffset = 110 + selectedCardsList.length * 25;
+        cardEl.style.setProperty('--card-z-offset', zOffset + 'px');
+
+        selectedCardsList.push({ el: cardEl, evt: evtObj });
+        cardEl.classList.add('focused-card');
+      }
+
+      if (selectedCardsList.length === 0) {
+        clearAllSelectedCards();
+        return;
+      }
+
+      update3DTiltAndDiegeticLines();
+    }
+
+    function clearAllSelectedCards() {
+      const wrapper = document.getElementById('grid-view-wrapper');
+      const bodyGrid = document.getElementById('timetable-body-grid');
+
+      selectedCardsList.forEach(item => {
+        if (item.el) {
+          item.el.classList.remove('focused-card');
+          const oldHud = item.el.querySelector('.diegetic-single-text-hud');
+          if (oldHud) oldHud.remove();
+        }
+      });
+      selectedCardsList = [];
+
+      if (bodyGrid) {
+        bodyGrid.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+      }
+      if (wrapper) {
+        wrapper.style.boxShadow = 'none';
+      }
+
+      const svgOverlay = document.getElementById('tactical-svg-overlay');
+      if (svgOverlay) svgOverlay.innerHTML = '';
+    }
+
+    // 計算坐標中心並執行顯著 3D 戰術傾斜
+    function update3DTiltAndDiegeticLines() {
+      const wrapper = document.getElementById('grid-view-wrapper');
+      const bodyGrid = document.getElementById('timetable-body-grid');
+      const svgOverlay = document.getElementById('tactical-svg-overlay');
+
+      if (!wrapper || !bodyGrid || !svgOverlay) return;
+
+      if (selectedCardsList.length === 0) {
+        bodyGrid.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+        wrapper.style.boxShadow = 'none';
+        svgOverlay.innerHTML = '';
+        return;
+      }
+
+      // 1. 幾何計算加權中心
+      let totalDay = 0;
+      let totalMin = 0;
+      selectedCardsList.forEach(item => {
+        totalDay += item.evt.dayOfWeek;
+        totalMin += (item.evt.startMin + item.evt.endMin) / 2;
+      });
+
+      const avgDay = totalDay / selectedCardsList.length;
+      const avgMin = totalMin / selectedCardsList.length;
+
+      // 限制傾斜角度，確保網格平穩
+      const rawRotY = -((avgDay - 3.5) * 2.0);
+      const rawRotX = ((avgMin - 900) / 420) * 3.0;
+      const rotY = Math.max(-4, Math.min(4, rawRotY));
+      const rotX = Math.max(-2.5, Math.min(2.5, rawRotX));
+
+      bodyGrid.style.transform = 'translateZ(100px) rotateX(' + rotX.toFixed(2) + 'deg) rotateY(' + rotY.toFixed(2) + 'deg) scale(0.97)';
+      wrapper.style.boxShadow = '0 25px 60px rgba(0,0,0,0.98), 0 0 35px var(--primary-glow)';
+
+      // 2. 於選中課程卡片頂部/底部渲染 3D 純文字戰術倒數 (智慧避讓定位：靠近頂部/向上彈窗時置於底部，其餘置於頂部)
+      const dict = I18N_DICT[currentLang];
+      svgOverlay.innerHTML = '';
+
+      document.querySelectorAll('.diegetic-single-text-hud').forEach(el => el.remove());
+
+      selectedCardsList.forEach(item => {
+        const evt = item.evt;
+
+        const startOfWeek = new Date(semesterStartDate);
+        startOfWeek.setDate(startOfWeek.getDate() + (currentWeekOffset * 7) + (evt.dayOfWeek - 1));
+        const evtStartDate = new Date(startOfWeek);
+        evtStartDate.setHours(Math.floor(evt.startMin / 60), evt.startMin % 60, 0, 0);
+
+        const now = new Date();
+        const diffMs = evtStartDate - now;
+        const diffMin = Math.floor(diffMs / (1000 * 60));
+
+        let statusText = '';
+        if (diffMin > 0) {
+          const days = Math.floor(diffMin / (24 * 60));
+          const hours = Math.floor((diffMin % (24 * 60)) / 60);
+          const mins = diffMin % 60;
+          let timePart = '';
+          if (days > 0) timePart += days + 'd ';
+          if (hours > 0) timePart += hours + 'h ';
+          timePart += mins + 'm';
+          statusText = '⏱ ' + timePart + ' ' + dict.untilStart;
+        } else if (diffMin >= -((evt.endMin - evt.startMin))) {
+          statusText = dict.statusInProgress;
+        } else {
+          statusText = dict.statusFinished;
+        }
+
+        const cardTop = parseFloat(item.el.style.top) || 0;
+        const popoverEl = item.el.querySelector('.hover-popover');
+        const isPopUp = popoverEl && popoverEl.classList.contains('pop-up');
+
+        const hudText = document.createElement('div');
+        hudText.className = 'diegetic-single-text-hud';
+
+        // 智慧避讓定位邏輯：靠頂部 (cardTop < 90px) 或向上彈窗時，將倒數標籤顯示於卡片正下方 (-28px)，確保 100% 視覺不被頂部 Header 遮擋！
+        if (isPopUp || cardTop < 90) {
+          hudText.style.top = 'auto';
+          hudText.style.bottom = '-28px';
+        } else {
+          hudText.style.top = '-28px';
+          hudText.style.bottom = 'auto';
+        }
+
+        hudText.innerText = '✦ ' + statusText + ' [' + evt.memberInitials + ']';
+        item.el.appendChild(hudText);
+      });
+    }
+
+    function parseAllPresets() {
+      PRESET_MEMBERS.forEach(m => {
+        parsedMemberEvents[m.id] = parseICS(m.ics, m);
+      });
+    }
+
+    function parseICS(icsString, member) {
+      const events = [];
+      const blocks = icsString.split('BEGIN:VEVENT');
+
+      for (let i = 1; i < blocks.length; i++) {
+        const block = blocks[i].split('END:VEVENT')[0];
+
+        let summary = 'Untitled Event';
+        let location = 'N/A';
+        let description = '';
+        let dtstartStr = '';
+        let dtendStr = '';
+
+        const lines = block.split(/\r?\n/);
+        for (let line of lines) {
+          line = line.trim();
+          if (line.startsWith('SUMMARY:')) summary = line.substring(8).trim();
+          else if (line.startsWith('LOCATION:')) location = line.substring(9).trim();
+          else if (line.startsWith('DESCRIPTION:')) description = line.substring(12).trim();
+          else if (line.includes('DTSTART')) {
+            const parts = line.split(':');
+            if (parts.length > 1) dtstartStr = parts[parts.length - 1].trim();
+          } else if (line.includes('DTEND')) {
+            const parts = line.split(':');
+            if (parts.length > 1) dtendStr = parts[parts.length - 1].trim();
+          }
+        }
+
+        if (dtstartStr && dtendStr) {
+          const matchStart = dtstartStr.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/);
+          const matchEnd = dtendStr.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/);
+
+          if (matchStart && matchEnd) {
+            const year = parseInt(matchStart[1]);
+            const month = parseInt(matchStart[2]) - 1;
+            const date = parseInt(matchStart[3]);
+            const sHour = parseInt(matchStart[4]);
+            const sMin = parseInt(matchStart[5]);
+            const eHour = parseInt(matchEnd[4]);
+            const eMin = parseInt(matchEnd[5]);
+
+            const dtObj = new Date(year, month, date);
+            let dayOfWeek = dtObj.getDay();
+            if (dayOfWeek === 0) dayOfWeek = 7;
+
+            events.push({
+              memberId: member.id,
+              memberName: member.name,
+              memberInitials: getMemberInitials(member.name),
+              color: member.color,
+              bg: member.bg,
+              text: member.text,
+              summary: summary,
+              location: location || 'N/A',
+              description: description,
+              dayOfWeek: dayOfWeek,
+              startMin: sHour * 60 + sMin,
+              endMin: eHour * 60 + eMin
+            });
+          }
+        }
+      }
+      return events;
+    }
+
+    // ==========================================
+    // 3. 頂部 Hero 與設定
+    // ==========================================
+    function setTheme(theme) {
+      currentTheme = theme;
+      document.body.classList.remove('theme-blue', 'theme-pink');
+      if (theme === 'blue') document.body.classList.add('theme-blue');
+      if (theme === 'pink') document.body.classList.add('theme-pink');
+
+      document.getElementById('theme-yellow-btn').classList.toggle('active', theme === 'yellow');
+      document.getElementById('theme-blue-btn').classList.toggle('active', theme === 'blue');
+      document.getElementById('theme-pink-btn').classList.toggle('active', theme === 'pink');
+    }
+
+    function renderInstButtons() {
+      const group = document.getElementById('inst-btn-group');
+      group.innerHTML = '';
+
+      Object.keys(INSTITUTIONS).forEach(key => {
+        const inst = INSTITUTIONS[key];
+        const btn = document.createElement('button');
+        btn.className = 'setting-btn ' + (selectedInstKey === key ? 'active' : '');
+        btn.innerText = currentLang === 'zh' ? inst.nameZh : inst.nameEn;
+        btn.onclick = () => selectInstitution(key);
+        group.appendChild(btn);
+      });
+    }
+
+    function selectInstitution(key) {
+      selectedInstKey = key;
+      semesterStartDate = INSTITUTIONS[key].date;
+      renderInstButtons();
+      resetToTodayCalculated();
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.getElementById('lang-zh-btn').classList.toggle('active', lang === 'zh');
+      document.getElementById('lang-en-btn').classList.toggle('active', lang === 'en');
+      applyI18nText();
+      renderInstButtons();
+      setupCustomSelectOptions();
+      updateHeaderDateDisplay();
+      renderTimetableDisplay();
+      runFreeTimeAnalysis();
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.getElementById('view-grid-btn').classList.toggle('active', mode === 'grid');
+      document.getElementById('view-list-btn').classList.toggle('active', mode === 'list');
+      document.getElementById('grid-view-wrapper').style.display = mode === 'grid' ? 'block' : 'none';
+      document.getElementById('list-view-wrapper').style.display = mode === 'list' ? 'flex' : 'none';
+      renderTimetableDisplay();
+    }
+
+    function applyI18nText() {
+      const dict = I18N_DICT[currentLang];
+      document.getElementById('i18n-hero-title').innerText = dict.heroTitle;
+      document.getElementById('i18n-hero-sub').innerText = dict.heroSub;
+      document.getElementById('i18n-label-today').innerText = dict.today;
+      document.getElementById('i18n-label-weekday').innerText = dict.weekday;
+      document.getElementById('i18n-label-term').innerText = dict.term;
+      document.getElementById('i18n-label-week').innerText = dict.week;
+
+      document.getElementById('theme-yellow-btn').innerText = dict.themeYellow;
+      document.getElementById('theme-blue-btn').innerText = dict.themeBlue;
+      document.getElementById('theme-pink-btn').innerText = dict.themePink;
+
+      document.getElementById('i18n-title-members').innerText = dict.titleMembers;
+      document.getElementById('i18n-btn-select-all').innerText = dict.btnSelectAll;
+      document.getElementById('i18n-btn-clear').innerText = dict.btnClear;
+      document.getElementById('i18n-title-schedule').innerText = dict.titleSchedule;
+      document.getElementById('i18n-btn-prev').innerText = dict.btnPrev;
+      document.getElementById('i18n-btn-next').innerText = dict.btnNext;
+      document.getElementById('i18n-btn-today').innerText = dict.btnToday;
+      document.getElementById('i18n-btn-clear-cards').innerText = dict.btnClearCards;
+      document.getElementById('i18n-btn-export-png').innerText = dict.btnExportPng;
+      document.getElementById('i18n-title-analysis').innerText = dict.titleAnalysis;
+
+      document.getElementById('view-grid-btn').innerText = dict.viewGridLabel;
+      document.getElementById('view-list-btn').innerText = dict.viewListLabel;
+
+      const overlayBtn = document.getElementById('i18n-btn-overlay');
+      overlayBtn.innerText = isOverlayActive ? dict.btnHideOverlay : dict.btnOverlay;
+
+      document.getElementById('i18n-lbl-target-day').innerText = dict.targetDay;
+      document.getElementById('i18n-lbl-start-time').innerText = dict.startTime;
+      document.getElementById('i18n-lbl-end-time').innerText = dict.endTime;
+      document.getElementById('i18n-lbl-min-dur').innerText = dict.minDur;
+
+      document.getElementById('i18n-modal-title').innerText = dict.modalTitle;
+      document.getElementById('i18n-modal-desc').innerText = dict.modalDesc;
+      document.getElementById('i18n-opt1-title').innerText = dict.opt1Title;
+      document.getElementById('i18n-opt1-desc').innerText = dict.opt1Desc;
+      document.getElementById('i18n-opt2-title').innerText = dict.opt2Title;
+      document.getElementById('i18n-opt2-desc').innerText = dict.opt2Desc;
+      document.getElementById('i18n-btn-modal-cancel').innerText = dict.modalCancel;
+      document.getElementById('i18n-btn-modal-confirm').innerText = dict.modalConfirm;
+    }
+
+    function updateHeaderDateDisplay() {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+      document.getElementById('hero-today-date').innerText = date + '/' + month;
+
+      const daysZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+      const daysEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      document.getElementById('hero-weekday').innerText = currentLang === 'zh' ? daysZh[now.getDay()] : daysEn[now.getDay()];
+
+      const diffTime = now - semesterStartDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const weekNum = Math.max(1, Math.floor(diffDays / 7) + 1);
+      document.getElementById('hero-week-num').innerText = 'W' + weekNum;
+    }
+
+    // ==========================================
+    // 4. 成員選擇膠囊管理
+    // ==========================================
+    function renderMemberChips() {
+      const container = document.getElementById('member-chips-container');
+      container.innerHTML = '';
+
+      PRESET_MEMBERS.forEach(m => {
+        const isSelected = selectedMemberIds.includes(m.id);
+        const initials = getMemberInitials(m.name);
+        const chip = document.createElement('div');
+        chip.className = 'member-chip ' + (isSelected ? 'selected' : '');
+        chip.style.setProperty('--chip-color', m.color);
+
+        chip.innerHTML = '<div class="avatar-circle">[' + initials + ']</div><span>' + m.name + '</span>';
+
+        chip.onclick = () => toggleMemberSelection(m.id);
+        container.appendChild(chip);
+      });
+    }
+
+    function toggleMemberSelection(memberId) {
+      if (selectedMemberIds.includes(memberId)) {
+        selectedMemberIds = selectedMemberIds.filter(id => id !== memberId);
+      } else {
+        selectedMemberIds.push(memberId);
+      }
+      renderMemberChips();
+      renderTimetableDisplay();
+      runFreeTimeAnalysis();
+    }
+
+    function selectAllMembers() {
+      selectedMemberIds = PRESET_MEMBERS.map(m => m.id);
+      renderMemberChips();
+      renderTimetableDisplay();
+      runFreeTimeAnalysis();
+    }
+
+    function clearSelectedMembers() {
+      selectedMemberIds = [];
+      renderMemberChips();
+      renderTimetableDisplay();
+      runFreeTimeAnalysis();
+    }
+
+    // ==========================================
+    // 5. 課表渲染與渲染邏輯
+    // ==========================================
+    function changeWeek(delta) {
+      currentWeekOffset += delta;
+      clearAllSelectedCards();
+      renderTimetableDisplay();
+    }
+
+    function resetToToday() {
+      resetToTodayCalculated();
+    }
+
+    function resetToTodayCalculated() {
+      const now = new Date();
+      const diffMs = now - semesterStartDate;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      currentWeekOffset = Math.floor(diffDays / 7);
+      if (currentWeekOffset < 0) currentWeekOffset = 0;
+
+      clearAllSelectedCards();
+      updateHeaderDateDisplay();
+      renderTimetableDisplay();
+      runFreeTimeAnalysis();
+    }
+
+    function renderTimetableDisplay() {
+      const displayWeekNum = 1 + currentWeekOffset;
+      const startOfWeek = new Date(semesterStartDate);
+      startOfWeek.setDate(startOfWeek.getDate() + (currentWeekOffset * 7));
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 5);
+
+      const rangeStr = startOfWeek.getDate() + '/' + (startOfWeek.getMonth()+1) + ' - ' + endOfWeek.getDate() + '/' + (endOfWeek.getMonth()+1);
+      document.getElementById('current-week-display').innerText = 
+        currentLang === 'zh' ? '第 ' + displayWeekNum + ' 週 (' + rangeStr + ')' : 'Week ' + displayWeekNum + ' (' + rangeStr + ')';
+
+      if (currentViewMode === 'grid') {
+        renderGridTimetable(startOfWeek);
+      } else {
+        renderListTimetable(startOfWeek);
+      }
+    }
+
+    function renderGridTimetable(startOfWeek) {
+      const dict = I18N_DICT[currentLang];
+      const headerGrid = document.getElementById('timetable-header-grid');
+      const bodyGrid = document.getElementById('timetable-body-grid');
+      headerGrid.innerHTML = '';
+      bodyGrid.innerHTML = '';
+
+      const now = new Date();
+
+      const cornerCell = document.createElement('div');
+      cornerCell.className = 'grid-header-cell';
+      cornerCell.innerText = dict.timeColLabel;
+      headerGrid.appendChild(cornerCell);
+
+      for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
+        const colDate = new Date(startOfWeek);
+        colDate.setDate(colDate.getDate() + (dayIdx - 1));
+        const isToday = (colDate.toDateString() === now.toDateString());
+
+        const hCell = document.createElement('div');
+        hCell.className = 'grid-header-cell ' + (isToday ? 'is-today' : '');
+
+        const dayName = dict.weekdays[dayIdx - 1];
+        const dateStr = colDate.getDate() + '/' + (colDate.getMonth() + 1);
+        const todayPillHtml = isToday ? ' <span class="today-pill">' + dict.todayTag + '</span>' : '';
+
+        hCell.innerHTML = dayName + ' <span style="font-size:0.75rem; opacity:0.8;">' + dateStr + '</span>' + todayPillHtml;
+        headerGrid.appendChild(hCell);
+      }
+
+      const timeAxis = document.createElement('div');
+      timeAxis.className = 'time-axis-col';
+      for (let hour = 8; hour < 22; hour++) {
+        const tCell = document.createElement('div');
+        tCell.className = 'time-axis-cell';
+        const startH = hour.toString().padStart(2, '0');
+        const endH = (hour + 1).toString().padStart(2, '0');
+        tCell.innerText = startH + ':00 - ' + endH + ':00';
+        timeAxis.appendChild(tCell);
+      }
+      bodyGrid.appendChild(timeAxis);
+
+      for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
+        const colDate = new Date(startOfWeek);
+        colDate.setDate(colDate.getDate() + (dayIdx - 1));
+        const isToday = (colDate.toDateString() === now.toDateString());
+
+        const dayCol = document.createElement('div');
+        dayCol.className = 'day-column ' + (isToday ? 'is-today' : '');
+        dayCol.id = 'day-col-' + dayIdx;
+
+        for (let h = 0; h < 14; h++) {
+          const line = document.createElement('div');
+          line.className = 'hour-line';
+          dayCol.appendChild(line);
+        }
+        bodyGrid.appendChild(dayCol);
+      }
+
+      renderEventCardsOnGrid();
+    }
+
+    function renderEventCardsOnGrid() {
+      if (selectedMemberIds.length === 0) return;
+
+      for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
+        const dayCol = document.getElementById('day-col-' + dayIdx);
+        if (!dayCol) continue;
+
+        let dayEvents = [];
+        selectedMemberIds.forEach(mId => {
+          const events = parsedMemberEvents[mId] || [];
+          events.filter(e => e.dayOfWeek === dayIdx).forEach(e => dayEvents.push(e));
+        });
+
+        if (dayEvents.length === 0) continue;
+
+        dayEvents.sort((a, b) => a.startMin - b.startMin);
+
+        dayEvents.forEach(evt => {
+          const overlaps = dayEvents.filter(other => 
+            other.memberId !== evt.memberId &&
+            Math.max(evt.startMin, other.startMin) < Math.min(evt.endMin, other.endMin)
+          );
+
+          let widthPct = 100;
+          let leftPct = 0;
+
+          if (overlaps.length > 0) {
+            const memberOrder = selectedMemberIds.indexOf(evt.memberId);
+            const totalCols = selectedMemberIds.length;
+            widthPct = 100 / totalCols;
+            leftPct = memberOrder * widthPct;
+          }
+
+          // 頂部計算加入 10px 的頭部安全導航間距，避免 8:00 AM 卡片與 Header 貼死
+          const topPx = 10 + ((evt.startMin - 480) / 60) * 80;
+          const heightPx = ((evt.endMin - evt.startMin) / 60) * 80;
+
+          const card = document.createElement('div');
+          card.className = 'grid-event-card';
+          card.style.top = topPx + 'px';
+          card.style.height = heightPx + 'px';
+          card.style.left = leftPct + '%';
+          card.style.width = widthPct + '%';
+
+          card.style.setProperty('--event-color', evt.color);
+          card.style.setProperty('--event-bg', evt.bg);
+          card.style.setProperty('--event-text', evt.text);
+
+          card.onclick = (e) => toggleCardMultiSelection(card, evt, e);
+
+          const startStr = formatMinutes(evt.startMin);
+          const endStr = formatMinutes(evt.endMin);
+
+          const isRightCol = dayIdx >= 5;
+          const isTopCol = topPx < 120;
+          const initials = evt.memberInitials;
+          const memberName = evt.memberName;
+          const summary = evt.summary;
+
+          card.innerHTML = 
+            '<div class="card-inner-base">' +
+              '<div class="sticky-badge">⏱ ' + startStr + ' - ' + endStr + ' · [' + initials + '] ' + memberName + '</div>' +
+              '<div class="event-card-title">' + summary + '</div>' +
+            '</div>' +
+            '<div class="hover-popover ' + (isRightCol ? 'pop-left' : '') + ' ' + (isTopCol ? '' : 'pop-up') + '">' +
+              '<span class="popover-badge">⏱ ' + startStr + ' - ' + endStr + '</span>' +
+              '<div class="popover-title">' + summary + '</div>' +
+              '<div class="popover-detail">👤 [' + initials + '] ' + memberName + '</div>' +
+              '<div class="popover-detail">📍 ' + evt.location + '</div>' +
+              (evt.description ? '<div class="popover-detail">📝 ' + evt.description + '</div>' : '') +
+            '</div>';
+
+          dayCol.appendChild(card);
+        });
+      }
+    }
+
+    function renderListTimetable(startOfWeek) {
+      const dict = I18N_DICT[currentLang];
+      const listWrapper = document.getElementById('list-view-wrapper');
+      listWrapper.innerHTML = '';
+
+      if (selectedMemberIds.length === 0) {
+        listWrapper.innerHTML = '<div class="empty-slots-msg">' + dict.noMemberPrompt + '</div>';
+        return;
+      }
+
+      for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
+        const colDate = new Date(startOfWeek);
+        colDate.setDate(colDate.getDate() + (dayIdx - 1));
+
+        let dayEvents = [];
+        selectedMemberIds.forEach(mId => {
+          const events = parsedMemberEvents[mId] || [];
+          events.filter(e => e.dayOfWeek === dayIdx).forEach(e => dayEvents.push(e));
+        });
+
+        dayEvents.sort((a, b) => a.startMin - b.startMin);
+
+        const card = document.createElement('div');
+        card.className = 'list-day-card';
+
+        const dateStr = colDate.getDate() + '/' + (colDate.getMonth()+1);
+        card.innerHTML = 
+          '<div class="list-day-header">' +
+            '<span>::0' + dayIdx + ' ' + dict.weekdays[dayIdx - 1] + ' (' + dateStr + ')</span>' +
+            '<span style="font-size:0.8rem; opacity:0.8;">' + dayEvents.length + ' ' + (currentLang === 'zh' ? '個課程' : 'Event(s)') + '</span>' +
+          '</div>' +
+          '<div class="list-events-body" id="list-day-body-' + dayIdx + '"></div>';
+
+        listWrapper.appendChild(card);
+
+        const body = document.getElementById('list-day-body-' + dayIdx);
+        if (dayEvents.length === 0) {
+          body.innerHTML = '<div class="empty-slots-msg">' + (currentLang === 'zh' ? '當天無課程安排' : 'No classes scheduled') + '</div>';
+        } else {
+          dayEvents.forEach(evt => {
+            const item = document.createElement('div');
+            item.className = 'list-event-item';
+            item.style.setProperty('--event-color', evt.color);
+
+            item.innerHTML = 
+              '<div class="list-time-badge">' + formatMinutes(evt.startMin) + ' - ' + formatMinutes(evt.endMin) + '</div>' +
+              '<div class="list-event-info">' +
+                '<div class="list-event-title">' + evt.summary + '</div>' +
+                '<div class="list-event-meta">' +
+                  '<span>👤 [' + evt.memberInitials + '] ' + evt.memberName + '</span>' +
+                  '<span>📍 ' + evt.location + '</span>' +
+                '</div>' +
+              '</div>';
+            body.appendChild(item);
+          });
+        }
+      }
+    }
+
+    // ==========================================
+    // 6. 自訂 Popover 下拉選單
+    // ==========================================
+    function setupCustomSelectOptions() {
+      const dict = I18N_DICT[currentLang];
+
+      const dayOptions = [
+        { value: 'all', text: dict.allWeekdays },
+        { value: '1', text: dict.weekdays[0] },
+        { value: '2', text: dict.weekdays[1] },
+        { value: '3', text: dict.weekdays[2] },
+        { value: '4', text: dict.weekdays[3] },
+        { value: '5', text: dict.weekdays[4] },
+        { value: '6', text: dict.weekdays[5] }
+      ];
+      renderSelectOptions('select-day-options', dayOptions, filterDay, (val, txt) => {
+        filterDay = val;
+        document.getElementById('select-day-text').innerText = txt;
+        runFreeTimeAnalysis();
+      });
+
+      const startOptions = [];
+      for (let h = 8; h <= 18; h++) {
+        const label = h.toString().padStart(2, '0') + ':00 ' + (h >= 12 ? 'PM' : 'AM');
+        startOptions.push({ value: h, text: label });
+      }
+      renderSelectOptions('select-start-options', startOptions, filterStartHour, (val, txt) => {
+        filterStartHour = parseInt(val);
+        document.getElementById('select-start-text').innerText = txt;
+        runFreeTimeAnalysis();
+      });
+
+      const endOptions = [];
+      for (let h = 12; h <= 22; h++) {
+        const label = h.toString().padStart(2, '0') + ':00 (' + h + ':00)';
+        endOptions.push({ value: h, text: label });
+      }
+      renderSelectOptions('select-end-options', endOptions, filterEndHour, (val, txt) => {
+        filterEndHour = parseInt(val);
+        document.getElementById('select-end-text').innerText = txt;
+        runFreeTimeAnalysis();
+      });
+
+      const durOptions = [
+        { value: 30, text: currentLang === 'zh' ? '30 分鐘' : '30 mins' },
+        { value: 60, text: currentLang === 'zh' ? '1 小時' : '1 hour' },
+        { value: 90, text: currentLang === 'zh' ? '1.5 小時' : '1.5 hours' },
+        { value: 120, text: currentLang === 'zh' ? '2 小時' : '2 hours' },
+        { value: 180, text: currentLang === 'zh' ? '3 小時' : '3 hours' }
+      ];
+      renderSelectOptions('select-dur-options', durOptions, filterMinDuration, (val, txt) => {
+        filterMinDuration = parseInt(val);
+        document.getElementById('select-dur-text').innerText = txt;
+        runFreeTimeAnalysis();
+      });
+    }
+
+    function renderSelectOptions(containerId, options, currentVal, onSelectCallback) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      options.forEach(opt => {
+        const isSel = (opt.value.toString() === currentVal.toString());
+        const item = document.createElement('div');
+        item.className = 'custom-option ' + (isSel ? 'selected' : '');
+        item.innerHTML = '<span>' + opt.text + '</span> ' + (isSel ? '✓' : '');
+
+        item.onclick = (e) => {
+          e.stopPropagation();
+          container.classList.remove('open');
+          onSelectCallback(opt.value, opt.text);
+          setupCustomSelectOptions();
+        };
+        container.appendChild(item);
+      });
+    }
+
+    function toggleCustomSelect(optionsId) {
+      const target = document.getElementById(optionsId);
+      const isOpen = target.classList.contains('open');
+      document.querySelectorAll('.custom-select-options').forEach(el => el.classList.remove('open'));
+      if (!isOpen) target.classList.add('open');
+    }
+
+    // ==========================================
+    // 7. 共同空閒時間比對演算法
+    // ==========================================
+    let computedFreeSlotsByDay = {};
+
+    function runFreeTimeAnalysis() {
+      const dict = I18N_DICT[currentLang];
+      const dashboard = document.getElementById('analysis-dashboard');
+      dashboard.innerHTML = '';
+      computedFreeSlotsByDay = {};
+
+      if (selectedMemberIds.length === 0) {
+        dashboard.innerHTML = '<div class="empty-slots-msg" style="grid-column: 1 / -1;">' + dict.noMemberPrompt + '</div>';
+        return;
+      }
+
+      const searchStartMin = filterStartHour * 60;
+      const searchEndMin = filterEndHour * 60;
+
+      for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
+        if (filterDay !== 'all' && filterDay.toString() !== dayIdx.toString()) {
+          continue;
+        }
+
+        let busyIntervals = [];
+        selectedMemberIds.forEach(mId => {
+          const events = parsedMemberEvents[mId] || [];
+          events.filter(e => e.dayOfWeek === dayIdx).forEach(e => {
+            busyIntervals.push({ start: e.startMin, end: e.endMin });
+          });
+        });
+
+        busyIntervals.sort((a, b) => a.start - b.start);
+        let mergedBusy = [];
+        busyIntervals.forEach(curr => {
+          if (mergedBusy.length === 0) {
+            mergedBusy.push(curr);
+          } else {
+            let last = mergedBusy[mergedBusy.length - 1];
+            if (curr.start < last.end) {
+              last.end = Math.max(last.end, curr.end);
+            } else {
+              mergedBusy.push(curr);
+            }
+          }
+        });
+
+        let freeSlots = [];
+        let cursor = searchStartMin;
+
+        mergedBusy.forEach(b => {
+          if (b.start > cursor) {
+            const freeStart = Math.max(cursor, searchStartMin);
+            const freeEnd = Math.min(b.start, searchEndMin);
+            if (freeEnd - freeStart >= filterMinDuration) {
+              freeSlots.push({ start: freeStart, end: freeEnd });
+            }
+          }
+          cursor = Math.max(cursor, b.end);
+        });
+
+        if (cursor < searchEndMin) {
+          const freeStart = Math.max(cursor, searchStartMin);
+          const freeEnd = searchEndMin;
+          if (freeEnd - freeStart >= filterMinDuration) {
+            freeSlots.push({ start: freeStart, end: freeEnd });
+          }
+        }
+
+        computedFreeSlotsByDay[dayIdx] = freeSlots;
+
+        const startOfWeek = new Date(semesterStartDate);
+        startOfWeek.setDate(startOfWeek.getDate() + (currentWeekOffset * 7) + (dayIdx - 1));
+        const dateStr = startOfWeek.getDate() + '/' + (startOfWeek.getMonth()+1);
+
+        const card = document.createElement('div');
+        card.className = 'day-analysis-card';
+
+        const slotsCount = freeSlots.length;
+        const statusText = slotsCount > 0 ? '✓ ' + slotsCount + ' ' + dict.availableSlots : '✕ ' + dict.allBusy;
+
+        let slotsHtml = '';
+        if (slotsCount > 0) {
+          freeSlots.forEach(s => {
+            const durationMin = s.end - s.start;
+            const durHours = (durationMin / 60).toFixed(1).replace('.0', '');
+            const durStr = currentLang === 'zh' ? durHours + ' 小時' : durHours + ' hrs';
+
+            slotsHtml += 
+              '<div class="free-slot-item">' +
+                '<span>⏱ ' + formatMinutes(s.start) + ' - ' + formatMinutes(s.end) + '</span>' +
+                '<span>⧖ ' + durStr + '</span>' +
+              '</div>';
+          });
+        } else {
+          slotsHtml = '<div class="empty-slots-msg">' + dict.allBusy + '</div>';
+        }
+
+        const dayTag = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][dayIdx - 1];
+
+        card.innerHTML = 
+          '<div class="day-analysis-header">' +
+            '<span class="day-analysis-title"># ' + dayTag + ' · ' + dict.weekdays[dayIdx - 1] + ' (' + dateStr + ')</span>' +
+            '<span class="day-status-pill">' + statusText + '</span>' +
+          '</div>' +
+          '<div class="free-slots-list">' + slotsHtml + '</div>';
+
+        dashboard.appendChild(card);
+      }
+
+      if (isOverlayActive) {
+        renderFreeOverlayOnGrid();
+      }
+    }
+
+    // ==========================================
+    // 8. 網格空閒圖層 Overlay 繪製
+    // ==========================================
+    function toggleFreeOverlay() {
+      isOverlayActive = !isOverlayActive;
+      const btn = document.getElementById('i18n-btn-overlay');
+      const dict = I18N_DICT[currentLang];
+      btn.classList.toggle('btn-primary', isOverlayActive);
+      btn.innerText = isOverlayActive ? dict.btnHideOverlay : dict.btnOverlay;
+
+      renderFreeOverlayOnGrid();
+    }
+
+    function renderFreeOverlayOnGrid() {
+      document.querySelectorAll('.free-overlay-block').forEach(el => el.remove());
+      if (!isOverlayActive) return;
+
+      const dict = I18N_DICT[currentLang];
+
+      for (let dayIdx = 1; dayIdx <= 6; dayIdx++) {
+        const dayCol = document.getElementById('day-col-' + dayIdx);
+        if (!dayCol) continue;
+
+        const slots = computedFreeSlotsByDay[dayIdx] || [];
+        slots.forEach(s => {
+          const topPx = 10 + ((s.start - 480) / 60) * 80;
+          const heightPx = ((s.end - s.start) / 60) * 80;
+
+          if (topPx >= 0 && heightPx > 0) {
+            const durHours = ((s.end - s.start) / 60).toFixed(1).replace('.0', '');
+            const overlayBlock = document.createElement('div');
+            overlayBlock.className = 'free-overlay-block';
+            overlayBlock.style.top = topPx + 'px';
+            overlayBlock.style.height = heightPx + 'px';
+            overlayBlock.innerText = '⚡ ' + durHours + 'hr ' + dict.freeLabel;
+
+            dayCol.appendChild(overlayBlock);
+          }
+        });
+      }
+    }
+
+    // ==========================================
+    // 9. PNG 圖片導出 Modal & html2canvas 繪製
+    // ==========================================
+    function openExportModal() {
+      document.getElementById('export-modal-backdrop').classList.add('active');
+    }
+
+    function closeExportModal() {
+      document.getElementById('export-modal-backdrop').classList.remove('active');
+    }
+
+    function selectExportOpt(optKey) {
+      selectedExportOption = optKey;
+      const card1 = document.getElementById('opt-sched-only');
+      const card2 = document.getElementById('opt-sched-analysis');
+
+      if (optKey === 'sched-only') {
+        card1.classList.add('selected');
+        card1.querySelector('span').innerText = '✓';
+        card2.classList.remove('selected');
+        card2.querySelector('span').innerText = '';
+      } else {
+        card2.classList.add('selected');
+        card2.querySelector('span').innerText = '✓';
+        card1.classList.remove('selected');
+        card1.querySelector('span').innerText = '';
+      }
+    }
+
+    function executeExportPNG() {
+      closeExportModal();
+
+      let targetEl;
+      if (selectedExportOption === 'sched-only') {
+        targetEl = document.getElementById('export-section-schedule');
+      } else {
+        targetEl = document.createElement('div');
+        targetEl.style.position = 'absolute';
+        targetEl.style.left = '-9999px';
+        targetEl.style.width = '1200px';
+        targetEl.style.background = '#0d0f12';
+        targetEl.style.padding = '20px';
+
+        const node1 = document.getElementById('export-section-schedule').cloneNode(true);
+        const node2 = document.getElementById('export-section-analysis').cloneNode(true);
+
+        targetEl.appendChild(node1);
+        targetEl.appendChild(node2);
+        document.body.appendChild(targetEl);
+      }
+
+      html2canvas(targetEl || document.getElementById('export-section-schedule'), {
+        backgroundColor: '#0d0f12',
+        scale: 2,
+        useCORS: true
+      }).then(canvas => {
+        if (selectedExportOption !== 'sched-only' && targetEl) {
+          document.body.removeChild(targetEl);
+        }
+
+        const link = document.createElement('a');
+        link.download = 'Schedule_Export_W' + (1 + currentWeekOffset) + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }).catch(err => {
+        alert('導出圖片發生錯誤：' + err.message);
+      });
+    }
+
+    function formatMinutes(min) {
+      const h = Math.floor(min / 60);
+      const m = min % 60;
+      return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+    }
+  </script>
+
+
+</body>
+</html>
