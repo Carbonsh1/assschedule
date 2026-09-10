@@ -1494,14 +1494,14 @@
     let filterEndHour = 22;
     let filterMinDuration = 60;
 
-    // 現代淺色調 Modern Bright & Tech Color Palette
-    // Gennadius: 清爽亮藍 (#38bdf8), Jason: 時尚淡粉 (#f472b6)
+    // 現代明亮淺色調配色 Modern Bright & Tech Color Palette
+    // Gennadius: 清爽天藍色 (#38bdf8), Jason: 時尚淡粉色 (#f472b6)
     const PRESET_MEMBERS = [
       {
         id: 'hino',
         name: 'Hino',
-        color: '#facc15', // 現代亮檸檬黃
-        bg: '#2e2810',
+        color: '#fde047', // 現代亮檸檬黃
+        bg: '#2b2915',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1570,7 +1570,7 @@ END:VCALENDAR`
       {
         id: 'gennadius',
         name: 'Gennadius',
-        color: '#38bdf8', // 清爽亮藍 (Blue)
+        color: '#38bdf8', // 清爽天藍色 (Blue)
         bg: '#11293a',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
@@ -1640,8 +1640,8 @@ END:VCALENDAR`
       {
         id: 'juno',
         name: 'Juno',
-        color: '#c084fc', // 柔和淺紫羅蘭
-        bg: '#2a1a38',
+        color: '#d8b4fe', // 柔和薰衣草淺紫
+        bg: '#2d1e3e',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1774,8 +1774,8 @@ END:VCALENDAR`
       {
         id: 'kelvin',
         name: 'Kelvin',
-        color: '#fb7185', // 柔亮珊瑚紅
-        bg: '#33151b',
+        color: '#fda4af', // 淺珊瑚蜜粉紅
+        bg: '#33171d',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1844,8 +1844,8 @@ END:VCALENDAR`
       {
         id: 'tenson',
         name: 'Tenson',
-        color: '#2dd4bf', // 亮薄荷綠
-        bg: '#0f2f2b',
+        color: '#5eead4', // 清爽淺薄荷青
+        bg: '#112f2b',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1904,8 +1904,8 @@ END:VCALENDAR`
       {
         id: 'enoch',
         name: 'Enoch',
-        color: '#fb923c', // 現代明亮蜜桃橙
-        bg: '#331d0f',
+        color: '#fdba74', // 柔和暖杏橙
+        bg: '#332014',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -1934,8 +1934,8 @@ END:VCALENDAR`
       {
         id: 'kim',
         name: 'Kim',
-        color: '#e879f9', // 明亮粉紫蘭花色
-        bg: '#321636',
+        color: '#f0abfc', // 亮明紫紅粉 (Light Orchid)
+        bg: '#341a38',
         text: '#ffffff',
         ics: `BEGIN:VCALENDAR
 VERSION:2.0
@@ -2010,10 +2010,9 @@ END:VCALENDAR`
       {
         id: 'hugo',
         name: 'Hugo',
-        color: '#34d399', // 翡翠淺碧綠 (Emerald Neon)
-        bg: '#0f3325',
+        color: '#6ee7b7', // 淺薄荷綠 (Mint Green)
+        bg: '#113326',
         text: '#ffffff',
-        // 包含複雜週次的多週次事件
         eventsData: [
           { day: 1, start: 570, end: 690, title: "ST-IT-MET3906-S1-L/1", loc: "ST-CS-404", weeks: "1-17" },
           { day: 1, start: 630, end: 750, title: "ST-IT-MET3902-S1-L/3", loc: "ST-CS-404", weeks: "1-17" },
@@ -2030,6 +2029,24 @@ END:VCALENDAR`
           { day: 4, start: 630, end: 690, title: "ST-IT-ITE3107-S1-T/01", loc: "ST-CS-438", weeks: "1-17" },
           { day: 5, start: 840, end: 930, title: "ST-IT-MET3902-S1-W/5", loc: "ST-IT-429", weeks: "1-17" },
           { day: 5, start: 960, end: 1020, title: "ST-IT-MET3918-S1-W/5", loc: "ST-IT-015", weeks: "1-16" }
+        ]
+      },
+      {
+        id: 'duncan',
+        name: 'Duncan',
+        color: '#67e8f9', // 現代亮冰藍青
+        bg: '#102e35',
+        text: '#ffffff',
+        // 包含常規週曆與指定日期的 Tutorial
+        eventsData: [
+          { day: 2, start: 960, end: 1140, title: "CCBS 4007 - CL05: Introduction to Management (Lecture)", loc: "CIT-803", weeks: "1-17" },
+          { day: 3, start: 600, end: 690, title: "CCEN 4003 - BL52: Intro to Academic English (Lecture)", loc: "KEE101", weeks: "1-17" },
+          { day: 3, start: 780, end: 870, title: "CCBS 4200 - CL11: CAR in Disc-based Studies (Lecture)", loc: "KEC704", weeks: "1-17" },
+          { day: 4, start: 870, end: 1050, title: "CCBS 4005 - CL18: Intro to Financial Accounting (Lecture)", loc: "CIT-705", weeks: "1-17" },
+          { day: 5, start: 600, end: 690, title: "CCEN 4003 - BL52: Intro to Academic English (Lecture)", loc: "KEE110", weeks: "1-17" },
+          { day: 6, start: 510, end: 690, title: "CCMA 4009 - CL05: Applied Statistics (Lecture)", loc: "CIT-402", weeks: "1-17" },
+          // 隔週 Tutorial (例如 29/9, 13/10, 27/10, 10/11, 24/11, 8/12 - 對應週次 4, 6, 8, 10, 12, 14)
+          { day: 2, start: 870, end: 960, title: "CCBS 4200 - CT60: CAR in Disc-based Studies (Tutorial)", loc: "CIT-805", weeks: "4, 6, 8, 10, 12, 14" }
         ]
       }
     ];
