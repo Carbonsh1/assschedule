@@ -1,28 +1,40 @@
-// functions/api/schedule.js
-export async function onRequestGet(context) {
-  // 從 Cloudflare KV 讀取所有人最新的課表
-  const data = await context.env.SCHEDULE_KV.get("schedules", { type: "json" });
-  return new Response(JSON.stringify(data || null), {
+// functions/api/data/[key].js
+
+const json = (data, status = 200) =>
+  new Response(JSON.stringify(data), {
+    status,
     headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-cache"
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store'
     }
   });
+
+// GET /api/data/:key  → 讀取
+export async function onRequestGet({ params, env }) {
+  const key = params.key;
+  if (!key) return json({ error: 'missing key' }, 400);
+
+  const value = await env.SCHEDULE_KV.get(key, { type: 'json' });
+  return json({ key, value: value ?? null });
 }
 
-export async function onRequestPost(context) {
-  try {
-    const newSchedule = await context.request.json();
-    // 將最新修改儲存進 Cloudflare KV
-    await context.env.SCHEDULE_KV.put("schedules", JSON.stringify(newSchedule));
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+// PUT /api/data/:key  → 寫入，body 格式 { value: ... }
+export async function onRequestPut({ params, request, env }) {
+  const key = params.key;
+  if (!key) return json({ error: 'missing key' }, 400);
+
+  const body = await request.json().catch(() => null);
+  if (!body || !('value' in body)) return json({ error: 'missing value' }, 400);
+
+  await env.SCHEDULE_KV.put(key, JSON.stringify(body.value));
+  return json({ ok: true, key });
 }
-// Cloudflare redeploy trigger
+
+// DELETE /api/data/:key  → 刪除
+export async function onRequestDelete({ params, env }) {
+  const key = params.key;
+  if (!key) return json({ error: 'missing key' }, 400);
+
+  await env.SCHEDULE_KV.delete(key);
+  return json({ ok: true, key });
+}
