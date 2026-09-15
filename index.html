@@ -3299,6 +3299,84 @@
     const STORAGE_KEY_GROUP_PRO = 'SHIT_HUB_GROUP_PRO_V2';
     const STORAGE_KEY_ACTIVITIES_PRO = 'SHIT_HUB_ACTIVITIES_PRO_V2';
 
+    // =========================================================================
+    // [KV] 6.5 Cloudflare API 同步層
+    // =========================================================================
+    const API_BASE = '/api';
+
+    const CLOUD_KEYS = {
+      prefs:      u => 'prefs:' + (u || 'guest'),
+      tools:      u => 'tools:' + (u || 'guest'),
+      wheel:      u => 'wheel:' + (u || 'guest'),
+      group:      u => 'group:' + (u || 'guest'),
+      schedules:  () => 'schedules:all',
+      stats:      () => 'stats:all',
+      activities: () => 'activities:all'
+    };
+
+    const CloudSync = {
+      _timers: {},
+
+      async _request(method, key, body) {
+        const url = API_BASE + '/data/' + encodeURIComponent(key);
+        const opts = {
+          method,
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' }
+        };
+        if (body !== undefined) opts.body = JSON.stringify(body);
+        try {
+          const res = await fetch(url, opts);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return await res.json();
+        } catch (err) {
+          console.warn('[CloudSync]', method, key, err);
+          return null;
+        }
+      },
+
+      async pull(key) {
+        const r = await this._request('GET', key);
+        return r && 'value' in r ? r.value : undefined;
+      },
+
+      // 寫入採 debounce，避免打字/滑動時打出大量請求
+      push(key, value, delay = 400) {
+        if (!key) return;
+        clearTimeout(this._timers[key]);
+        this._timers[key] = setTimeout(() => {
+          this._request('PUT', key, { value });
+        }, delay);
+      },
+
+      pushNow(key, value) {
+        if (!key) return Promise.resolve();
+        clearTimeout(this._timers[key]);
+        return this._request('PUT', key, { value });
+      }
+    };
+
+    // 從 KV 拉全部資料，寫回 localStorage 快取；失敗就沿用本機
+    async function hydrateFromCloud() {
+      const u = state.currentUser ? state.currentUser.username : null;
+      const pairs = [
+        [STORAGE_KEY_PREFS,          CLOUD_KEYS.prefs(u)],
+        [STORAGE_KEY_TOOLSETTINGS,   CLOUD_KEYS.tools(u)],
+        [STORAGE_KEY_WHEEL_PRO,      CLOUD_KEYS.wheel(u)],
+        [STORAGE_KEY_GROUP_PRO,      CLOUD_KEYS.group(u)],
+        [STORAGE_KEY_SCHEDULES,      CLOUD_KEYS.schedules()],
+        [STORAGE_KEY_STUDY_STATS,    CLOUD_KEYS.stats()],
+        [STORAGE_KEY_ACTIVITIES_PRO, CLOUD_KEYS.activities()]
+      ];
+
+      const values = await Promise.all(pairs.map(([, ck]) => CloudSync.pull(ck)));
+      values.forEach((val, i) => {
+        if (val === undefined || val === null) return;
+        try { localStorage.setItem(pairs[i][0], JSON.stringify(val)); }
+        catch (e) { console.warn('cache write failed', e); }
+      });
+    }
+
     function dateToStr(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
@@ -3344,11 +3422,18 @@
         semesterStart: dateToStr(state.semesterStartDate)
       };
       localStorage.setItem(STORAGE_KEY_PREFS, JSON.stringify(prefs));
+      // [KV] 同步到雲端
+      CloudSync.push(
+        CLOUD_KEYS.prefs(state.currentUser ? state.currentUser.username : null),
+        prefs
+      );
     }
 
     function saveScheduleDB() {
       try { localStorage.setItem(STORAGE_KEY_SCHEDULES, JSON.stringify(RAW_SCHEDULE_DB)); }
       catch (e) { console.warn('Save schedule error:', e); }
+      // [KV] 同步到雲端
+      CloudSync.push(CLOUD_KEYS.schedules(), RAW_SCHEDULE_DB);
     }
 
     // =========================================================================
@@ -4222,6 +4307,8 @@
     function setStudyStats(obj) {
       try { localStorage.setItem(STORAGE_KEY_STUDY_STATS, JSON.stringify(obj)); }
       catch (e) { }
+      // [KV] 學習時間每秒跳一次，debounce 拉長避免 API 爆炸
+      CloudSync.push(CLOUD_KEYS.stats(), obj, 2000);
     }
 
     function addStudySecond() {
@@ -4394,6 +4481,27 @@
       renderNotifications(); updateNotificationBadgePro();
       closeLoginModal();
       showToast((currentLang === 'zh' ? '歡迎回來，' : 'Welcome back, ') + found.username + '!');
+
+      // [KV] 登入後重新從雲端拉該帳號的資料，再重整畫面
+      hydrateFromCloud().then(() => {
+        loadPersistedPreferences();
+        loadToolSettings();
+        loadPro();
+        applyTheme(state.currentTheme);
+        applyLanguage(currentLang);
+        renderWheelMembers();
+        renderWheelDisplay();
+        updateWheelRemovePanel();
+        renderGroupMembers();
+        renderPairSelects();
+        renderGroupResult();
+        if (typeof renderCurrentActivities === 'function') renderCurrentActivities();
+        renderNotifications();
+        updateNotificationBadgePro();
+        renderTimetableView();
+        updateUserAuthUI();
+      });
+
       return true;
     }
 
@@ -4406,6 +4514,8 @@
       renderTimetableView();
       renderNotifications(); updateNotificationBadgePro();
       closeLoginModal();
+      // [KV] 登出後回到 guest key（等同清空回預設）
+      hydrateFromCloud();
     }
 
 
@@ -4421,7 +4531,18 @@
     function activityWeek(ds){const d=new Date(ds+'T00:00:00');const base=new Date(state.semesterStartDate);base.setHours(0,0,0,0);return Math.floor((d-base)/604800000)+1;}
     function activityTimeConflict(memberId,date,start,end){const day=activityDayIndex(date), week=activityWeek(date), out=[];(RAW_SCHEDULE_DB[memberId]||[]).forEach(ev=>{if(ev.day===day&&isEventActiveInWeek(ev.weeks,week)&&timeToMinutes(start)<timeToMinutes(ev.end)&&timeToMinutes(end)>timeToMinutes(ev.start))out.push(ev);});return out;}
     function getPublishedActivitiesForMembers(members){return [];}
-    function savePro(){try{localStorage.setItem(STORAGE_KEY_WHEEL_PRO,JSON.stringify(wheelPro));localStorage.setItem(STORAGE_KEY_GROUP_PRO,JSON.stringify(groupPro));localStorage.setItem(STORAGE_KEY_ACTIVITIES_PRO,JSON.stringify(activityPro));}catch(e){}}
+    function savePro(){
+      try{
+        localStorage.setItem(STORAGE_KEY_WHEEL_PRO,JSON.stringify(wheelPro));
+        localStorage.setItem(STORAGE_KEY_GROUP_PRO,JSON.stringify(groupPro));
+        localStorage.setItem(STORAGE_KEY_ACTIVITIES_PRO,JSON.stringify(activityPro));
+      }catch(e){}
+      // [KV] 同步到雲端
+      const u = state.currentUser ? state.currentUser.username : null;
+      CloudSync.push(CLOUD_KEYS.wheel(u), wheelPro);
+      CloudSync.push(CLOUD_KEYS.group(u), groupPro);
+      CloudSync.push(CLOUD_KEYS.activities(), activityPro, 800);
+    }
     function loadPro(){
       const readJson=(key,fallback)=>{try{const raw=localStorage.getItem(key);if(!raw)return fallback;const value=JSON.parse(raw);return value??fallback;}catch(e){return fallback;}};
       const wheelSaved=readJson(STORAGE_KEY_WHEEL_PRO,{}), groupSaved=readJson(STORAGE_KEY_GROUP_PRO,{}), activitySaved=readJson(STORAGE_KEY_ACTIVITIES_PRO,{});
@@ -6219,6 +6340,11 @@ h.appendChild(el)});if(!h.children.length)h.innerHTML='<div class="notification-
           }
         };
         localStorage.setItem(STORAGE_KEY_TOOLSETTINGS, JSON.stringify(data));
+        // [KV] 同步到雲端
+        CloudSync.push(
+          CLOUD_KEYS.tools(state.currentUser ? state.currentUser.username : null),
+          data
+        );
       } catch (e) { }
     }
 
@@ -6448,9 +6574,21 @@ h.appendChild(el)});if(!h.children.length)h.innerHTML='<div class="notification-
     // =========================================================================
     // 30. 啟動初始化
     // =========================================================================
-    window.addEventListener('DOMContentLoaded', () => {
+    // [KV] 改成 async：先本機快取渲染，再向 Cloudflare KV 拉資料後重新載入
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 先用本機快取，畫面可立即顯示
       loadPersistedPreferences();
       loadToolSettings();
+      loadPro();
+
+      // 再向 Cloudflare KV 拉資料；失敗就沿用本機快取
+      await hydrateFromCloud();
+
+      // 雲端資料回來後重新載入
+      loadPersistedPreferences();
+      loadToolSettings();
+      loadPro();
+
       initLiveClock();
 
       if (state.currentUser) {
